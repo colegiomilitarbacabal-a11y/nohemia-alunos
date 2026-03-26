@@ -1,0 +1,33 @@
+{
+  "name": "U.E.F Nohemia Almeida — Gestão de Alunos",
+  "short_name": "Nohemia",
+  "description": "Sistema de Gestão de Alunos da U.E.F Nohemia Almeida",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1a2010",
+  "theme_color": "#2d3a1e",
+  "lang": "pt-BR",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["education", "productivity"],
+  "shortcuts": [
+    {
+      "name": "Abrir Sistema",
+      "url": "./index.html",
+      "description": "Acessar gestão de alunos"
+    }
+  ]
+}

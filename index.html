@@ -1,0 +1,1887 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Sistema de Gestão — U.E.F Nohemia Almeida</title>
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2d3a1e">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Nohemia">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --olive: #2d3a1e;
+  --olive2: #3d5026;
+  --olive3: #4a6130;
+  --khaki: #8a9a5b;
+  --khaki2: #b5c17a;
+  --gold: #c9a84c;
+  --gold2: #e8c96a;
+  --cream: #f5f0e0;
+  --cream2: #ede5cc;
+  --dark: #1a2010;
+  --red-alert: #c0392b;
+  --text: #1e2810;
+  --status-ok: #27ae60;
+  --status-warn: #f39c12;
+  --status-bad: #c0392b;
+  --card-bg: #fffef8;
+  --border: #c5bb8e;
+  --shadow: 0 2px 12px rgba(0,0,0,0.12);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: 'Source Sans 3', sans-serif;
+  background: var(--cream);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 16px;
+}
+
+/* ===== HEADER ===== */
+.app-header {
+  background: linear-gradient(135deg, var(--dark) 0%, var(--olive) 60%, var(--olive2) 100%);
+  color: var(--cream);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+}
+
+.header-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-bottom: 1px solid rgba(201,168,76,0.3);
+}
+
+.header-emblem {
+  width: 46px; height: 46px;
+  background: var(--gold);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 3px var(--gold2);
+}
+
+.header-title h1 {
+  font-family: 'Oswald', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--gold2);
+  line-height: 1.2;
+}
+
+.header-title p {
+  font-size: 0.68rem;
+  color: var(--khaki2);
+  letter-spacing: 0.5px;
+  margin-top: 2px;
+}
+
+/* Header toggle button */
+.header-toggle-btn {
+  margin-left: auto;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(201,168,76,0.4);
+  border-radius: 6px;
+  color: var(--gold2);
+  padding: 6px 10px;
+  font-size: 0.75rem;
+  font-family: 'Oswald', sans-serif;
+  letter-spacing: 1px;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Collapsible admin section */
+.admin-section {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.3s ease;
+}
+.admin-section.open { max-height: 400px; }
+
+.command-section {
+  background: var(--olive);
+  padding: 12px 16px;
+}
+
+.command-section h2 {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.7rem;
+  letter-spacing: 3px;
+  color: var(--gold);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.command-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+@media (max-width: 480px) {
+  .command-grid { grid-template-columns: 1fr; }
+}
+
+.command-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.command-field label {
+  font-size: 0.65rem;
+  color: var(--khaki2);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.command-field input {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(201,168,76,0.3);
+  border-radius: 4px;
+  padding: 8px 10px;
+  color: var(--cream);
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 0.9rem;
+  transition: border-color 0.2s;
+  width: 100%;
+}
+
+.command-field input:focus {
+  outline: none;
+  border-color: var(--gold);
+  background: rgba(255,255,255,0.12);
+}
+
+.command-field input::placeholder { color: rgba(255,255,255,0.3); }
+
+.monitors-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  padding: 10px 16px 12px;
+  background: rgba(0,0,0,0.2);
+}
+
+@media (max-width: 480px) {
+  .monitors-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+.monitor-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.monitor-field label {
+  font-size: 0.62rem;
+  color: var(--khaki2);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.monitor-field input {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(201,168,76,0.2);
+  border-radius: 4px;
+  padding: 6px 8px;
+  color: var(--cream);
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 0.85rem;
+  width: 100%;
+}
+
+.monitor-field input:focus {
+  outline: none;
+  border-color: var(--gold);
+}
+
+/* Save indicator */
+.save-toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--olive2);
+  color: var(--gold2);
+  padding: 10px 22px;
+  border-radius: 24px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.85rem;
+  letter-spacing: 1px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  z-index: 999;
+  transition: transform 0.3s ease;
+  pointer-events: none;
+}
+.save-toast.show { transform: translateX(-50%) translateY(0); }
+
+/* ===== MAIN CONTENT ===== */
+.main-content {
+  padding: 12px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* ===== TURMA SELECTOR ===== */
+.turma-selector-section {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 14px;
+  box-shadow: var(--shadow);
+}
+
+.turma-selector-section h2 {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.85rem;
+  letter-spacing: 2px;
+  color: var(--olive);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  padding-bottom: 7px;
+  border-bottom: 2px solid var(--khaki);
+}
+
+.turma-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.turma-btn {
+  background: var(--cream2);
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  padding: 9px 14px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.82rem;
+  letter-spacing: 0.5px;
+  color: var(--olive);
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  min-height: 44px;
+}
+
+.turma-btn:active {
+  transform: scale(0.96);
+}
+
+.turma-btn.active {
+  background: var(--olive2);
+  color: var(--gold2);
+  border-color: var(--gold);
+}
+
+/* ===== CONTROLS BAR ===== */
+.controls-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  box-shadow: var(--shadow);
+}
+
+.month-label {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.78rem;
+  letter-spacing: 1px;
+  color: var(--olive2);
+  text-transform: uppercase;
+}
+
+.month-select {
+  background: var(--cream2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 9px 14px;
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 0.95rem;
+  color: var(--text);
+  cursor: pointer;
+  min-height: 44px;
+}
+
+.turma-info {
+  margin-left: auto;
+  background: var(--olive);
+  color: var(--gold2);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.78rem;
+  letter-spacing: 0.5px;
+}
+
+/* ===== ALUNO CARD ===== */
+.alunos-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.aluno-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.aluno-card.especial {
+  border-left: 4px solid #e67e22;
+}
+
+/* ===== STATUS COLOR STRIPE ===== */
+.status-stripe {
+  height: 5px;
+  width: 100%;
+  transition: background 0.4s;
+}
+.status-stripe.nivel-verde-forte { background: #1a7a2e; }
+.status-stripe.nivel-verde-fraco { background: #4caf50; }
+.status-stripe.nivel-amarelo     { background: #f1c40f; }
+.status-stripe.nivel-laranja     { background: #e67e22; }
+.status-stripe.nivel-vermelho    { background: #c0392b; }
+.status-stripe.nivel-neutro      { background: transparent; }
+
+.nivel-badge {
+  display: inline-block;
+  width: 11px; height: 11px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-left: 5px;
+  vertical-align: middle;
+  border: 2px solid rgba(0,0,0,0.15);
+  cursor: help;
+}
+.nivel-badge.nivel-verde-forte { background: #1a7a2e; }
+.nivel-badge.nivel-verde-fraco { background: #4caf50; }
+.nivel-badge.nivel-amarelo     { background: #f1c40f; }
+.nivel-badge.nivel-laranja     { background: #e67e22; }
+.nivel-badge.nivel-vermelho    { background: #c0392b; }
+.nivel-badge.nivel-neutro      { background: #ccc; }
+
+
+.aluno-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: linear-gradient(90deg, var(--cream2), var(--card-bg));
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  min-height: 68px;
+}
+
+.aluno-foto-area {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.aluno-foto {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: var(--cream2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  overflow: hidden;
+}
+
+.aluno-foto img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.foto-upload-btn {
+  position: absolute;
+  bottom: -2px; right: -2px;
+  width: 22px; height: 22px;
+  background: var(--olive);
+  border: none;
+  border-radius: 50%;
+  color: var(--cream);
+  font-size: 11px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 2;
+}
+
+.foto-upload-btn:active { background: var(--gold); }
+
+.aluno-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.aluno-nome {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--olive);
+  letter-spacing: 0.3px;
+  line-height: 1.2;
+}
+
+.aluno-meta {
+  display: flex;
+  gap: 8px;
+  margin-top: 3px;
+  flex-wrap: wrap;
+}
+
+.aluno-meta span {
+  font-size: 0.72rem;
+  color: #666;
+}
+
+.especial-badge {
+  background: #e67e22;
+  color: white;
+  padding: 2px 7px;
+  border-radius: 10px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+/* Header right side - compact on mobile */
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.faltas-quick {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+}
+
+.falta-count {
+  font-family: 'Oswald', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--olive);
+  line-height: 1;
+}
+
+.falta-count.alerta { color: var(--red-alert); }
+
+.falta-label {
+  font-size: 0.62rem;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.falta-alert-icon {
+  color: var(--red-alert);
+  font-size: 0.9rem;
+  display: none;
+}
+
+.btn-falta {
+  background: var(--red-alert);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  white-space: nowrap;
+  min-height: 44px;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.btn-falta:active { opacity: 0.7; transform: scale(0.96); }
+
+.expand-arrow {
+  color: var(--khaki);
+  font-size: 1rem;
+  transition: transform 0.3s;
+  flex-shrink: 0;
+}
+
+.expand-arrow.open { transform: rotate(180deg); }
+
+/* ===== ALUNO BODY ===== */
+.aluno-body {
+  display: none;
+  padding: 14px;
+  border-top: 1px solid var(--border);
+  background: #fafaf5;
+}
+
+.aluno-body.open { display: block; }
+
+/* Mobile: stack columns */
+.aluno-body-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+@media (min-width: 700px) {
+  .aluno-body-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+}
+
+.section-label {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.72rem;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--olive2);
+  margin-bottom: 10px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--khaki2);
+}
+
+/* Status selects */
+.avaliacao-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.avaliacao-item {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.avaliacao-item label {
+  font-size: 0.68rem;
+  color: #555;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.status-select {
+  border: 2px solid var(--border);
+  border-radius: 6px;
+  padding: 9px 28px 9px 10px;
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M6 8L0 0h12z' fill='%23888'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  min-height: 44px;
+  width: 100%;
+}
+
+.status-select.padrao {
+  background-color: #e8f5e9;
+  color: #1b5e20;
+  border-color: #4caf50;
+}
+
+.status-select.regular {
+  background-color: #fff8e1;
+  color: #e65100;
+  border-color: #f39c12;
+}
+
+.status-select.alterado {
+  background-color: #ffebee;
+  color: #b71c1c;
+  border-color: #c0392b;
+}
+
+/* Familiar */
+.familiar-select {
+  border: 2px solid var(--border);
+  border-radius: 6px;
+  padding: 9px 10px;
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 4px;
+  min-height: 44px;
+}
+
+.familiar-select.receptivo {
+  background-color: #e3f2fd;
+  color: #0d47a1;
+  border-color: #1565c0;
+}
+
+.familiar-select.hostil {
+  background-color: #ffebee;
+  color: #b71c1c;
+  border-color: #c0392b;
+}
+
+/* Faltas calendar - BIGGER on mobile */
+.faltas-month-days {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 8px;
+}
+
+.day-btn {
+  width: 38px; height: 38px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--cream2);
+  font-size: 0.82rem;
+  font-family: 'Oswald', sans-serif;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex; align-items: center; justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.day-btn:active { transform: scale(0.9); }
+
+.day-btn.falta {
+  background: var(--red-alert);
+  color: white;
+  border-color: #922b21;
+}
+
+.faltas-summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.faltas-summary .count {
+  font-family: 'Oswald', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.faltas-summary .warning {
+  color: var(--red-alert);
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+/* Responsavel */
+.responsavel-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.responsavel-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.responsavel-field label {
+  font-size: 0.68rem;
+  color: #555;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.responsavel-field input {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 10px;
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 0.95rem;
+  background: white;
+  min-height: 44px;
+  width: 100%;
+}
+
+.responsavel-field input:focus {
+  outline: none;
+  border-color: var(--olive);
+}
+
+/* Observações */
+.obs-textarea {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px;
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 0.95rem;
+  resize: vertical;
+  min-height: 80px;
+  background: white;
+  margin-top: 6px;
+}
+
+.obs-textarea:focus {
+  outline: none;
+  border-color: var(--olive);
+}
+
+/* Tooltip - tap on mobile */
+.tooltip-container { position: relative; }
+
+.tooltip-box {
+  display: none;
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--dark);
+  color: var(--cream);
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  width: 85vw;
+  max-width: 340px;
+  text-align: center;
+  z-index: 500;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+}
+
+.tooltip-container.tapped .tooltip-box { display: block; }
+
+/* empty state */
+.empty-state {
+  text-align: center;
+  padding: 50px 20px;
+  color: #aaa;
+}
+
+.empty-state .icon { font-size: 3rem; margin-bottom: 12px; }
+
+.empty-state p {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.95rem;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.foto-input { display: none; }
+
+/* Hint de faltas */
+.faltas-hint {
+  font-size: 0.73rem;
+  color: #888;
+  margin-top: 8px;
+}
+
+/* Search bar */
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 180px;
+}
+
+.search-input {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 9px 12px;
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 0.9rem;
+  background: var(--cream2);
+  width: 100%;
+  min-height: 44px;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--olive);
+}
+</style>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, set, get, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBEjAUOr7IWzH7ZJQzT0JQuw-KBVgeIIGI",
+    authDomain: "nohemia-alunos.firebaseapp.com",
+    databaseURL: "https://nohemia-alunos-default-rtdb.firebaseio.com",
+    projectId: "nohemia-alunos",
+    storageBucket: "nohemia-alunos.firebasestorage.app",
+    messagingSenderId: "243043498278",
+    appId: "1:243043498278:web:0bf6bbdfb61fc0d1e6e9e7",
+    measurementId: "G-V6TL3JTCWR"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  // ===== FIREBASE HELPERS =====
+  window.fbSave = async function(path, data) {
+    try {
+      await set(ref(db, path), data);
+      // Also save to localStorage as backup
+      try { localStorage.setItem('fb_' + path.replace(/\//g,'_'), JSON.stringify(data)); } catch(e) {}
+    } catch(e) {
+      console.warn('Firebase offline, queuing:', path);
+      // Save to localStorage for offline use
+      try { localStorage.setItem('fb_' + path.replace(/\//g,'_'), JSON.stringify(data)); } catch(ex) {}
+      // Queue for when back online
+      if (!window._offlineQueue) window._offlineQueue = [];
+      window._offlineQueue.push({path, data});
+    }
+  };
+
+  window.fbUpdate = async function(path, data) {
+    try {
+      await update(ref(db, path), data);
+    } catch(e) { console.error('Firebase update error:', e); }
+  };
+
+  window.fbGet = async function(path) {
+    try {
+      const snap = await get(ref(db, path));
+      return snap.exists() ? snap.val() : null;
+    } catch(e) { console.error('Firebase get error:', e); return null; }
+  };
+
+  window.fbListen = function(path, callback) {
+    // Try localStorage fallback first for instant load
+    try {
+      const cached = localStorage.getItem('fb_' + path.replace(/\//g,'_'));
+      if (cached) callback(JSON.parse(cached));
+    } catch(e) {}
+    // Then listen to Firebase for real-time updates
+    onValue(ref(db, path), (snap) => {
+      const val = snap.exists() ? snap.val() : null;
+      if (val) {
+        try { localStorage.setItem('fb_' + path.replace(/\//g,'_'), JSON.stringify(val)); } catch(e) {}
+      }
+      callback(val);
+    });
+  };
+
+  // ===== LOAD ALL DATA FROM FIREBASE ON START =====
+  // Listen to fotos separately
+  window.fbListen('fotos', (val) => {
+    if (!val) return;
+    for (const k in val) {
+      if (!window.alunoData[k]) window.alunoData[k] = { faltas: {}, avaliacao: { disciplina:'padrao', ordemUnida:'padrao', apresentacao:'padrao', habilFisica:'padrao', habilPortugues:'padrao', habilMatematica:'padrao', familiar:'receptivo' }, responsavel:{nome:'',telefone:''}, obs:'' };
+      window.alunoData[k].foto = val[k].foto;
+      // Update foto element if visible
+      const parts = k.split('_');
+      // key format: TURMAID_ALUNOID (turmaId may contain underscores, alunoId is last)
+      const lastUnderscore = k.lastIndexOf('_');
+      const tid = k.substring(0, lastUnderscore);
+      const aid = k.substring(lastUnderscore + 1);
+      const fotoEl = document.getElementById('foto-' + tid + '-' + aid);
+      if (fotoEl && val[k].foto) fotoEl.innerHTML = '<img src="' + val[k].foto + '" alt="">';
+    }
+  });
+
+  // Monitor connection state
+  import { ref as dbRef } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+  const connectedRef = dbRef(db, '.info/connected');
+  onValue(connectedRef, (snap) => {
+    const online = snap.val() === true;
+    const el = document.getElementById('onlineStatus');
+    if (el) {
+      el.style.display = 'block';
+      el.style.background = online ? '#27ae60' : '#c0392b';
+      el.textContent = online ? '🟢 Online' : '🔴 Offline';
+    }
+    // If back online, flush pending queue
+    if (online && window._offlineQueue && window._offlineQueue.length > 0) {
+      window._offlineQueue.forEach(item => window.fbSave(item.path, item.data));
+      window._offlineQueue = [];
+    }
+  });
+
+  window.fbListen('dados', (val) => {
+    if (val) {
+      window.alunoData = val;
+    }
+    if (!window._fbInitialized) {
+      window._fbInitialized = true;
+      // Re-render current turma if selected
+      if (window.selectedTurma) window.renderAlunoList();
+    }
+  });
+
+  window.fbListen('admin', (val) => {
+    if (val) {
+      if (val.cmdColegio) document.getElementById('cmd-colegio').value = val.cmdColegio;
+      if (val.subcmd) document.getElementById('subcmd-colegio').value = val.subcmd;
+      if (val.chefAdm) document.getElementById('chef-adm').value = val.chefAdm;
+      if (val.cmdCorpo) document.getElementById('cmd-corpo').value = val.cmdCorpo;
+      if (val.mon) val.mon.forEach((v,i) => { const el = document.getElementById('mon'+(i+1)); if(el && v) el.value = v; });
+    }
+  });
+</script>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="header-top">
+    <div class="header-emblem">🎖️</div>
+    <div class="header-title">
+      <h1>U.E.F Nohemia Almeida</h1>
+      <p>GESTÃO DE ALUNOS — ANO LETIVO 2026</p>
+    </div>
+    <button class="header-toggle-btn" onclick="toggleAdmin()">⚙️ ADM</button>
+  </div>
+
+  <div class="admin-section" id="adminSection">
+    <div class="command-section">
+      <h2>Comando &amp; Administração</h2>
+      <div class="command-grid">
+        <div class="command-field">
+          <label>Comandante do Colégio</label>
+          <input type="text" placeholder="Nome e Posto" id="cmd-colegio" oninput="saveAdmin()">
+        </div>
+        <div class="command-field">
+          <label>Subcomandante</label>
+          <input type="text" placeholder="Nome e Posto" id="subcmd-colegio" oninput="saveAdmin()">
+        </div>
+        <div class="command-field">
+          <label>Chefe da Administração</label>
+          <input type="text" placeholder="Nome e Posto" id="chef-adm" oninput="saveAdmin()">
+        </div>
+        <div class="command-field">
+          <label>Cmd. do Corpo de Alunos</label>
+          <input type="text" placeholder="Nome e Posto" id="cmd-corpo" oninput="saveAdmin()">
+        </div>
+      </div>
+    </div>
+    <div class="monitors-grid">
+      <div class="monitor-field"><label>Monitor 1</label><input type="text" id="mon1" placeholder="Nome" oninput="saveAdmin()"></div>
+      <div class="monitor-field"><label>Monitor 2</label><input type="text" id="mon2" placeholder="Nome" oninput="saveAdmin()"></div>
+      <div class="monitor-field"><label>Monitor 3</label><input type="text" id="mon3" placeholder="Nome" oninput="saveAdmin()"></div>
+      <div class="monitor-field"><label>Monitor 4</label><input type="text" id="mon4" placeholder="Nome" oninput="saveAdmin()"></div>
+      <div class="monitor-field"><label>Monitor 5</label><input type="text" id="mon5" placeholder="Nome" oninput="saveAdmin()"></div>
+      <div class="monitor-field"><label>Monitor 6</label><input type="text" id="mon6" placeholder="Nome" oninput="saveAdmin()"></div>
+    </div>
+  </div>
+</header>
+
+<div class="save-toast" id="saveToast">💾 Salvo!</div>
+<div id="onlineStatus" style="position:fixed;top:8px;right:12px;z-index:200;font-size:0.7rem;font-family:'Oswald',sans-serif;letter-spacing:1px;padding:3px 10px;border-radius:12px;background:#27ae60;color:white;display:none;">🟢 ON</div>
+
+<main class="main-content">
+
+  <div class="turma-selector-section">
+    <h2>📋 Selecionar Turma</h2>
+    <div class="turma-grid" id="turmaGrid"></div>
+  </div>
+
+  <div class="controls-bar" id="controlsBar" style="display:none;">
+    <span class="month-label">Mês:</span>
+    <select class="month-select" id="monthSelect" onchange="renderAlunoList()">
+      <option value="3">Março</option>
+      <option value="4">Abril</option>
+      <option value="5">Maio</option>
+      <option value="6">Junho</option>
+      <option value="7">Julho</option>
+      <option value="8">Agosto</option>
+      <option value="9">Setembro</option>
+      <option value="10">Outubro</option>
+      <option value="11">Novembro</option>
+      <option value="12">Dezembro</option>
+    </select>
+    <div class="search-bar">
+      <input type="search" class="search-input" id="searchInput" placeholder="🔍 Buscar aluno..." oninput="renderAlunoList()">
+    </div>
+    <span class="turma-info" id="turmaInfoBadge"></span>
+  </div>
+
+  <div id="alunosContainer">
+    <div class="empty-state">
+      <div class="icon">🎖️</div>
+      <p>Selecione uma turma</p>
+    </div>
+  </div>
+
+</main>
+
+<script>
+// ==================== DATA ====================
+const turmas = [
+  {
+    id: "1ANO_VESP", nome: "1º Ano Vesp.", turno: "Vespertino",
+    alunos: [
+      { id: 1, nome: "Adryan Miguel da Silva Pereira", sexo: "M", nascimento: "13/01/2020" },
+      { id: 2, nome: "Ana Ruth Eufigenio da Silva Dias", sexo: "F", nascimento: "29/12/2019" },
+      { id: 3, nome: "Angela Gabrielly Sousa Rodrigues", sexo: "F", nascimento: "29/07/2019" },
+      { id: 4, nome: "Anna Laura Pereira Coutinho", sexo: "F", nascimento: "30/11/2019" },
+      { id: 5, nome: "Anna Ysabelly Reis Martins", sexo: "F", nascimento: "30/03/2020" },
+      { id: 6, nome: "Aylla Mirelly do Nascimento dos Santos", sexo: "F", nascimento: "26/08/2019" },
+      { id: 7, nome: "Benjamin da Silva Meireles", sexo: "M", nascimento: "12/01/2020", especial: "Transtorno do Espectro Autista (TEA)" },
+      { id: 8, nome: "Dhessica Jardiely Oliveira Silva", sexo: "F", nascimento: "09/05/2019" },
+      { id: 9, nome: "Eloá Pereira do Nascimento", sexo: "F", nascimento: "13/10/2019" },
+      { id: 10, nome: "Enzo Gabriel Martins Alves", sexo: "M", nascimento: "07/01/2020" },
+      { id: 11, nome: "Fernando Miguel Conceição da Silva", sexo: "M", nascimento: "11/11/2019" },
+      { id: 12, nome: "Heitor Gael Sousa Nascimento", sexo: "M", nascimento: "17/05/2019" },
+      { id: 13, nome: "Kaylla Jamilly de Sousa da Silva", sexo: "F", nascimento: "29/08/2019" },
+      { id: 14, nome: "Lays de Oliveira Sousa", sexo: "F", nascimento: "24/10/2019" },
+      { id: 15, nome: "Lorenzo Martim de Sousa dos Santos", sexo: "M", nascimento: "09/04/2019" },
+      { id: 16, nome: "Luiz Davy Pereira Viana", sexo: "M", nascimento: "27/09/2019", especial: "Transtorno do Espectro Autista (TEA) e Transtorno Desafiador Opositor" },
+      { id: 17, nome: "Marcos Vinícius Silva dos Santos", sexo: "M", nascimento: "23/09/2019", especial: "Transtorno do Espectro Autista (TEA)" },
+      { id: 18, nome: "Maria Eduarda da Conceição do Nascimento", sexo: "F", nascimento: "09/07/2019", especial: "Síndrome de Down" },
+      { id: 19, nome: "Maria Estela Paz Maia", sexo: "F", nascimento: "31/07/2019" },
+      { id: 20, nome: "Maria Vitória Ferreira Oliveira", sexo: "F", nascimento: "23/08/2019" },
+      { id: 21, nome: "Nicolas Ferreira Nascimento Nunes", sexo: "M", nascimento: "07/07/2019" },
+      { id: 22, nome: "Rayanna Victoria Reis da Silva", sexo: "F", nascimento: "05/02/2020", especial: "Transtorno do Espectro Autista (TEA)" },
+      { id: 23, nome: "Raylla Samantha do Carmo Silva", sexo: "F", nascimento: "06/03/2020" },
+      { id: 24, nome: "Renan da Conceição Araújo", sexo: "M", nascimento: "27/09/2019" },
+      { id: 25, nome: "Sandra Ruthiely da Silva Herculano", sexo: "F", nascimento: "22/03/2020" }
+    ]
+  },
+  {
+    id: "2ANO_A_VESP", nome: "2º Ano A - Vesp.", turno: "Vespertino",
+    alunos: [
+      { id: 1, nome: "Adryan Gabriel Lopes da Silva", sexo: "M", nascimento: "22/01/2019" },
+      { id: 2, nome: "Antonio Emanoel de Sousa Ribeiro", sexo: "M", nascimento: "25/09/2018", especial: "TEA e TDAH" },
+      { id: 3, nome: "Antonio Lorenzo Castro Ferreira", sexo: "M", nascimento: "12/04/2018" },
+      { id: 4, nome: "Arthu Demétrio Santos Silva", sexo: "M", nascimento: "18/05/2018" },
+      { id: 5, nome: "Davi Lucas Carneiro dos Santos Pinheiro", sexo: "M", nascimento: "12/12/2018", especial: "Artrogripose Congênita Múltipla (ACM), com rigidez articular e deformidades musculoesqueléticas, apresentando limitações significativas na mobilidade" },
+      { id: 6, nome: "Ellaine Vitória de Sousa da Silva", sexo: "F", nascimento: "01/04/2018" },
+      { id: 7, nome: "João Gabriel Costa Sousa", sexo: "M", nascimento: "03/09/2018" },
+      { id: 8, nome: "João Pedro Sousa dos Santos", sexo: "M", nascimento: "01/02/2019" },
+      { id: 9, nome: "Marcos Ezequiel Correia Leandro", sexo: "M", nascimento: "13/09/2018" },
+      { id: 10, nome: "Maria Helena Almeida Silva", sexo: "F", nascimento: "29/03/2019" },
+      { id: 11, nome: "Maria Laura Alves Silva", sexo: "F", nascimento: "08/08/2017", especial: "Esquizofrenia, alteração de comportamento e dificuldade de concentração" },
+      { id: 12, nome: "Maysa Gabriela dos Santos Lima", sexo: "F", nascimento: "19/02/2019" },
+      { id: 13, nome: "Moisés Cleyton Silva Rodrigues", sexo: "M", nascimento: "29/08/2018" },
+      { id: 14, nome: "Pedro Luan Alves de Castro", sexo: "M", nascimento: "03/07/2018" },
+      { id: 15, nome: "Washington Ruan da Conceição da Cruz", sexo: "M", nascimento: "28/03/2019" }
+    ]
+  },
+  {
+    id: "2ANO_B_VESP", nome: "2º Ano B - Vesp.", turno: "Vespertino",
+    alunos: [
+      { id: 1, nome: "Adria Levi do Carmo Silva", sexo: "M", nascimento: "04/08/2018" },
+      { id: 2, nome: "Emylli Vitória dos Santos de Souza", sexo: "F", nascimento: "11/02/2019" },
+      { id: 3, nome: "João Queiroz", sexo: "M", nascimento: "31/01/2019" },
+      { id: 4, nome: "José Luís da Conceição Ferreira", sexo: "M", nascimento: "20/01/2019" },
+      { id: 5, nome: "Kauê dos Santos Machado", sexo: "M", nascimento: "09/10/2018" },
+      { id: 6, nome: "Lara Valentina Frazão Conceicao", sexo: "F", nascimento: "14/12/2018" },
+      { id: 7, nome: "Lucas David Pereira Viana", sexo: "M", nascimento: "21/05/2018" },
+      { id: 8, nome: "Maria Cecília Lima Silva", sexo: "F", nascimento: "07/11/2018" },
+      { id: 9, nome: "Mariana Kateleya de Sousa Silva", sexo: "F", nascimento: "27/06/2018", especial: "Transtorno do Espectro Autista (TEA)" },
+      { id: 10, nome: "Miguel Viana Costa", sexo: "M", nascimento: "10/12/2018" },
+      { id: 11, nome: "Rayelly Shofia Ramos de Oliveira", sexo: "F", nascimento: "05/11/2017" },
+      { id: 12, nome: "Vitor Gabriel Sousa Lemos", sexo: "M", nascimento: "25/08/2018" },
+      { id: 13, nome: "Wemerson Riquelme Lima da Silva", sexo: "M", nascimento: "01/03/2019", especial: "Retardo mental não especificado com comprometimento significativo do comportamento / TDAH" },
+      { id: 14, nome: "Wesley Gabriel Silva Araujo", sexo: "M", nascimento: "30/07/2018" },
+      { id: 15, nome: "Yngrid Radassa da Silva Herculano", sexo: "F", nascimento: "10/07/2018" }
+    ]
+  },
+  {
+    id: "3ANO_VESP", nome: "3º Ano Vesp.", turno: "Vespertino",
+    alunos: [
+      { id: 1, nome: "Arthur Péricles Leal da Silva", sexo: "M", nascimento: "18/07/2017" },
+      { id: 2, nome: "Carlos Daniel Maia da Silva", sexo: "M", nascimento: "06/01/2018" },
+      { id: 3, nome: "Emilly Mikelly de Oliveira Santos", sexo: "F", nascimento: "13/02/2018", especial: "Transtorno do Espectro Autista (TEA)" },
+      { id: 4, nome: "Enzo Gabryell Rodrigues Freitas", sexo: "M", nascimento: "21/04/2017" },
+      { id: 5, nome: "Everton Kauê Santos do Nascimento", sexo: "M", nascimento: "15/09/2017" },
+      { id: 6, nome: "Haylla Christina Linhares Silva", sexo: "F", nascimento: "20/10/2017", especial: "Encefalopatia infecciosa (sífilis congênita), distúrbio de comportamento hiperativo, impulsivo e desatenção persistente" },
+      { id: 7, nome: "Iasmim Costa de Araújo", sexo: "F", nascimento: "24/11/2017" },
+      { id: 8, nome: "Isaac Ravy Silva da Costa Veras", sexo: "M", nascimento: "09/05/2017" },
+      { id: 9, nome: "Jarlison James dos Santos Campos", sexo: "M", nascimento: "19/04/2017", especial: "Malformações congênitas do coração" },
+      { id: 10, nome: "Jenifer Vitória Sousa dos Santos Freitas", sexo: "F", nascimento: "28/07/2017" },
+      { id: 11, nome: "Jeysla Rayane dos Santos Conceição", sexo: "F", nascimento: "19/02/2018" },
+      { id: 12, nome: "Joabe Fernandes Queiroz", sexo: "M", nascimento: "23/06/2017", especial: "Transtorno do Espectro Autista (TEA)" },
+      { id: 13, nome: "José Carlos dos Santos", sexo: "M", nascimento: "14/12/2017" },
+      { id: 14, nome: "Kelly Lorranny da Conceição do Nascimento", sexo: "F", nascimento: "10/03/2018", especial: "Baixa visão" },
+      { id: 15, nome: "Laryssa Manuella Vieira Castro", sexo: "F", nascimento: "20/06/2017" },
+      { id: 16, nome: "Liardyson Venicios Miranda da Conceição", sexo: "M", nascimento: "09/02/2018" },
+      { id: 17, nome: "Lorenna Sophia Lima Herculano", sexo: "F", nascimento: "19/05/2017" },
+      { id: 18, nome: "Maria Allycya Oliveira Lemos", sexo: "F", nascimento: "19/03/2018" },
+      { id: 19, nome: "Maria Eduarda de Almeida Nascimento", sexo: "F", nascimento: "02/02/2018" },
+      { id: 20, nome: "Maria Sofia Sousa dos Santos", sexo: "F", nascimento: "01/08/2017" },
+      { id: 21, nome: "Paulo Callebe Sousa da Conceição", sexo: "M", nascimento: "16/06/2017" },
+      { id: 22, nome: "Raissa Vitória da Conceição Araujo", sexo: "F", nascimento: "06/10/2017" },
+      { id: 23, nome: "Samuel dos Reis Frazão", sexo: "M", nascimento: "18/01/2018" },
+      { id: 24, nome: "Victor Hugo Ferreira Morais", sexo: "M", nascimento: "12/03/2018" },
+      { id: 25, nome: "Wanderson Silva Morais", sexo: "M", nascimento: "05/06/2017" }
+    ]
+  },
+  {
+    id: "4ANO_VESP", nome: "4º Ano Vesp.", turno: "Vespertino",
+    alunos: [
+      { id: 1, nome: "Agatha Nicolly Santos da Cruz", sexo: "F", nascimento: "06/09/2016" },
+      { id: 2, nome: "Ana Clara Silva de Araujo", sexo: "F", nascimento: "12/06/2016" },
+      { id: 3, nome: "Ana Leticia Matos de Sousa", sexo: "F", nascimento: "21/08/2016" },
+      { id: 4, nome: "Ana Maria da Conceição Marinho de Oliveira", sexo: "F", nascimento: "19/09/2016" },
+      { id: 5, nome: "Anna Luiza Sousa Rodrigues", sexo: "F", nascimento: "29/03/2017" },
+      { id: 6, nome: "Arthur Ronald Alves Monteiro", sexo: "M", nascimento: "21/12/2016" },
+      { id: 7, nome: "Elisa Ferreira de Amorim", sexo: "F", nascimento: "09/03/2017" },
+      { id: 8, nome: "Emanuelly Sophia de Oliveira", sexo: "F", nascimento: "28/07/2016" },
+      { id: 9, nome: "Ester Cunha do Nascimento", sexo: "F", nascimento: "22/05/2016" },
+      { id: 10, nome: "Evillyn Kauanny Santos do Nascimento", sexo: "F", nascimento: "19/09/2016" },
+      { id: 11, nome: "João Gabriel Vieira de Oliveira", sexo: "M", nascimento: "03/08/2016" },
+      { id: 12, nome: "José Felipe da Silva", sexo: "M", nascimento: "27/05/2016" },
+      { id: 13, nome: "José Miguel Roberto da Silva Ribeiro", sexo: "M", nascimento: "01/08/2016" },
+      { id: 14, nome: "Kelvin Kennedy Lima da Silva", sexo: "M", nascimento: "05/09/2016" },
+      { id: 15, nome: "Kemilly dos Santos Machado", sexo: "F", nascimento: "23/09/2016" },
+      { id: 16, nome: "Laíz Mirelly Marques Veras", sexo: "F", nascimento: "06/11/2016" },
+      { id: 17, nome: "Lara Sophia Fernandes Santos", sexo: "F", nascimento: "12/04/2016" },
+      { id: 18, nome: "Liandra Sophia Miranda da Conceição", sexo: "F", nascimento: "17/04/2016" },
+      { id: 19, nome: "Lilian Victoria da Conceição Morais", sexo: "F", nascimento: "08/10/2016" },
+      { id: 20, nome: "Luis Gustavo Araujo dos Santos", sexo: "M", nascimento: "10/07/2016" },
+      { id: 21, nome: "Luis Otavio Santos de Souza", sexo: "M", nascimento: "30/01/2016" },
+      { id: 22, nome: "Maria Júlia Souza Viana Gaspar", sexo: "F", nascimento: "26/09/2016" },
+      { id: 23, nome: "Maria Karolline Santos da Silva", sexo: "F", nascimento: "23/05/2016" },
+      { id: 24, nome: "Maria Sofia Silva Araujo", sexo: "F", nascimento: "02/05/2016" },
+      { id: 25, nome: "Nicolas Andre Rodrigues Morais", sexo: "M", nascimento: "30/01/2017" },
+      { id: 26, nome: "Rebeka da Silva Barbosa", sexo: "F", nascimento: "18/04/2016" },
+      { id: 27, nome: "Rômulo Gabriel Cantanhede Moreira", sexo: "M", nascimento: "17/03/2017" },
+      { id: 28, nome: "Victor Emanuel Viana da Conceição", sexo: "M", nascimento: "31/05/2016" },
+      { id: 29, nome: "Yuri Daniel da Silva Herculano", sexo: "M", nascimento: "28/10/2016" }
+    ]
+  },
+  {
+    id: "5ANO_VESP", nome: "5º Ano Vesp.", turno: "Vespertino",
+    alunos: [
+      { id: 1, nome: "Aghata Samilly da Silva Santos", sexo: "F", nascimento: "15/11/2015" },
+      { id: 2, nome: "Ana Regina dos Santos Sousa", sexo: "F", nascimento: "05/06/2015" },
+      { id: 3, nome: "Antonio Carlos da Silva Lopes", sexo: "M", nascimento: "05/01/2016" },
+      { id: 4, nome: "Camila dos Santos Souza", sexo: "F", nascimento: "21/01/2012", especial: "Retardo mental grave" },
+      { id: 5, nome: "Chrystian Gabriel de Sousa Oliveira", sexo: "M", nascimento: "18/01/2016" },
+      { id: 6, nome: "Davi Luis de Souza Moraes", sexo: "M", nascimento: "30/04/2016" },
+      { id: 7, nome: "David Ruan de Souza Moraes", sexo: "M", nascimento: "05/04/2015" },
+      { id: 8, nome: "Emanuely da Conceição Mesquita", sexo: "F", nascimento: "23/05/2015" },
+      { id: 9, nome: "Enzo Leonardo Almeida Salazar", sexo: "M", nascimento: "14/03/2016" },
+      { id: 10, nome: "Evelli Vitória do Carmo da Silva", sexo: "F", nascimento: "06/02/2016" },
+      { id: 11, nome: "Francislane de Almeida Lima", sexo: "F", nascimento: "21/09/2015" },
+      { id: 12, nome: "Gabrielly Nascimento dos Santos", sexo: "F", nascimento: "12/11/2015" },
+      { id: 13, nome: "Isabela Silva Cantanhêde", sexo: "F", nascimento: "07/02/2016" },
+      { id: 14, nome: "João Carlos Rodrigues Silva", sexo: "M", nascimento: "02/04/2015" },
+      { id: 15, nome: "João Lucas da Silva Costa", sexo: "M", nascimento: "18/08/2015" },
+      { id: 16, nome: "João Luccas Freitas Lima", sexo: "M", nascimento: "02/06/2015" },
+      { id: 17, nome: "Kely Vitoria dos Santos de Souza", sexo: "F", nascimento: "26/07/2014" },
+      { id: 18, nome: "Khevillyn Anastasia Rodrigues Monteiro", sexo: "F", nascimento: "01/10/2015" },
+      { id: 19, nome: "Leandro de Sousa dos Reis", sexo: "M", nascimento: "06/07/2015" },
+      { id: 20, nome: "Maria Alessandra da Conceição da Cruz", sexo: "F", nascimento: "13/10/2015" },
+      { id: 21, nome: "Maria Alexssa Amorim de Sousa", sexo: "F", nascimento: "10/09/2015" },
+      { id: 22, nome: "Maria Isis Frazão Salazar Freitas", sexo: "F", nascimento: "01/07/2015" },
+      { id: 23, nome: "Maria Julia da Costa Silva", sexo: "F", nascimento: "18/01/2016" },
+      { id: 24, nome: "Maria Vitória Marques Vital", sexo: "F", nascimento: "16/03/2016" },
+      { id: 25, nome: "Maria Yasmin Almeida Alves", sexo: "F", nascimento: "21/09/2014" },
+      { id: 26, nome: "Miguel Santos Ferreira", sexo: "M", nascimento: "29/11/2015" },
+      { id: 27, nome: "Rey Carlos Silva Moreira", sexo: "M", nascimento: "13/01/2015" },
+      { id: 28, nome: "Rômulo Rodrigues Costa", sexo: "M", nascimento: "18/12/2015" },
+      { id: 29, nome: "Sophia Emanuelly Martins Rodrigues", sexo: "F", nascimento: "10/01/2016" },
+      { id: 30, nome: "Thalyson Vitor Costa de Lima", sexo: "M", nascimento: "04/11/2015" },
+      { id: 31, nome: "Yasmim Rocha da Conceição", sexo: "F", nascimento: "27/11/2015" },
+      { id: 32, nome: "Yasmin Emanuelly Gonçalves dos Santos", sexo: "F", nascimento: "01/01/2016" }
+    ]
+  },
+  {
+    id: "6ANO_MAT", nome: "6º Ano - Mat.", turno: "Matutino",
+    alunos: [
+      { id: 1, nome: "Abner Fernandes Queiroz", sexo: "M", nascimento: "21/08/2014" },
+      { id: 2, nome: "Alexandre Vinicius Pereira Coutinho", sexo: "M", nascimento: "15/05/2014" },
+      { id: 3, nome: "Anielly Victória Rodrigues do Carmo", sexo: "F", nascimento: "02/10/2014" },
+      { id: 4, nome: "Arquel Alves da Silva", sexo: "M", nascimento: "21/11/2014" },
+      { id: 5, nome: "Carlos Alexandre Maia da Silva", sexo: "M", nascimento: "28/01/2015" },
+      { id: 6, nome: "Daniel Silva Mendes", sexo: "M", nascimento: "29/10/2014" },
+      { id: 7, nome: "Davi Luis da Cruz Carvalho", sexo: "M", nascimento: "28/03/2015" },
+      { id: 8, nome: "Emanuelly do Nascimento da Silva", sexo: "F", nascimento: "15/03/2015" },
+      { id: 9, nome: "Erverson Kauan Santos Nascimento", sexo: "M", nascimento: "03/09/2014" },
+      { id: 10, nome: "Francisca Scarllet Lima Herculano", sexo: "F", nascimento: "05/12/2014" },
+      { id: 11, nome: "Genesia da Silva de Almeida", sexo: "F", nascimento: "20/08/2014" },
+      { id: 12, nome: "Isac Maciel Marinho de Lima Oliveira", sexo: "M", nascimento: "01/11/2014" },
+      { id: 13, nome: "Jandeson Geovane dos Santos Campos", sexo: "M", nascimento: "06/10/2014" },
+      { id: 14, nome: "João Marcelo Lima Silva", sexo: "M", nascimento: "23/03/2015" },
+      { id: 15, nome: "Joarllyson Roberto da Silva Ribeiro", sexo: "M", nascimento: "28/12/2014" },
+      { id: 16, nome: "José Lorenzo Costa Silva", sexo: "M", nascimento: "10/01/2015" },
+      { id: 17, nome: "Kalliel Erivelto Mesquita Ferreira", sexo: "M", nascimento: "16/12/2014" },
+      { id: 18, nome: "Kaua Alves Ferreira", sexo: "M", nascimento: "14/09/2014" },
+      { id: 19, nome: "Keven dos Santos Machado", sexo: "M", nascimento: "30/03/2015" },
+      { id: 20, nome: "Larissa Manuelly Santana de Sousa", sexo: "F", nascimento: "27/04/2014" },
+      { id: 21, nome: "Leonardo Lima dos Reis", sexo: "M", nascimento: "19/05/2014" },
+      { id: 22, nome: "Maria Clara da Conceição da Cruz", sexo: "F", nascimento: "02/06/2014" },
+      { id: 23, nome: "Maria Clara Pereira Costa", sexo: "F", nascimento: "18/01/2015" },
+      { id: 24, nome: "Maria das Dores Pereira Salazar", sexo: "F", nascimento: "14/01/2014" },
+      { id: 25, nome: "Maria Eduarda Borges dos Santos", sexo: "F", nascimento: "21/03/2015" },
+      { id: 26, nome: "Maria Eloyse Viana Queiros", sexo: "F", nascimento: "04/02/2015" },
+      { id: 27, nome: "Maria Vitória dos Santos da Silva", sexo: "F", nascimento: "13/03/2015" },
+      { id: 28, nome: "Matheus Nascimento dos Santos", sexo: "M", nascimento: "12/10/2014" },
+      { id: 29, nome: "Maysa Mayane Santos da Silva", sexo: "F", nascimento: "04/11/2014" },
+      { id: 30, nome: "Mirian Palhano Pereira", sexo: "F", nascimento: "26/08/2014" },
+      { id: 31, nome: "Nadson Miguel Silva do Nascimento", sexo: "M", nascimento: "03/08/2014" },
+      { id: 32, nome: "Rayza Santos Medeiros", sexo: "M", nascimento: "25/08/2014" },
+      { id: 33, nome: "Sarah Cristina Alves Felipe", sexo: "F", nascimento: "04/08/2012" },
+      { id: 34, nome: "Stephanny Lauanny de Brito da Silva", sexo: "F", nascimento: "30/12/2014" },
+      { id: 35, nome: "Thaylane Vitória Costa de Lima", sexo: "F", nascimento: "28/08/2014" },
+      { id: 36, nome: "Victor Ramon Oliveira de Brito", sexo: "M", nascimento: "28/07/2014" },
+      { id: 37, nome: "William Matheus de Sousa Santos", sexo: "M", nascimento: "15/09/2014" }
+    ]
+  },
+  {
+    id: "7ANO_A_MAT", nome: "7º Ano A - Mat.", turno: "Matutino",
+    alunos: [
+      { id: 1, nome: "Alisson Breno Frazão Reis", sexo: "M", nascimento: "27/07/2013" },
+      { id: 2, nome: "Ana Erica Silva Dias", sexo: "F", nascimento: "28/08/2013" },
+      { id: 3, nome: "Anna Jullya Lima Carvalho", sexo: "F", nascimento: "17/09/2013" },
+      { id: 4, nome: "Antonia Vitória Nascimento Campos", sexo: "F", nascimento: "13/06/2013" },
+      { id: 5, nome: "Hemilly Lorrane dos Santos Sousa", sexo: "F", nascimento: "21/04/2013" },
+      { id: 6, nome: "Jackson Carlos Araujo Silva", sexo: "M", nascimento: "30/09/2013" },
+      { id: 7, nome: "Joanderson Roberto da Silva Ribeiro", sexo: "M", nascimento: "06/08/2013" },
+      { id: 8, nome: "José Lucas Silva Santos", sexo: "M", nascimento: "25/03/2014", especial: "Transtorno do Espectro Autista (TEA)" },
+      { id: 9, nome: "Julia Graciele Olviveira da Silva", sexo: "F", nascimento: "17/10/2012" },
+      { id: 10, nome: "Jéssika Karolinne Barros Pereira", sexo: "F", nascimento: "24/09/2013" },
+      { id: 11, nome: "Lívia Maria Alves da Silva", sexo: "F", nascimento: "22/06/2014" },
+      { id: 12, nome: "Maria de Jesus Sousa da Silva", sexo: "F", nascimento: "05/09/2013" },
+      { id: 13, nome: "Maria Iolanda da Silva Silva", sexo: "F", nascimento: "25/10/2013" },
+      { id: 14, nome: "Maria Isabele da Silva Carvalho", sexo: "F", nascimento: "31/05/2013" },
+      { id: 15, nome: "Maria Vitória Araujo Costa", sexo: "F", nascimento: "16/01/2014" },
+      { id: 16, nome: "Michely Vitória Duarte da Silva", sexo: "F", nascimento: "27/05/2013" },
+      { id: 17, nome: "Mikaelly da Silva Pereira", sexo: "F", nascimento: "12/03/2014" },
+      { id: 18, nome: "Raimundo Kaio da Silva Cruz", sexo: "M", nascimento: "05/09/2013", especial: "Transtorno do Espectro Autista (TEA)" },
+      { id: 19, nome: "Samuel Salazar de Oliveira", sexo: "M", nascimento: "22/10/2013" },
+      { id: 20, nome: "Silas Mikael Andrade de Sousa", sexo: "M", nascimento: "01/07/2013" }
+    ]
+  },
+  {
+    id: "7ANO_B_MAT", nome: "7º Ano B - Mat.", turno: "Matutino",
+    alunos: [
+      { id: 1, nome: "Abmael Flávio de Lima Santos Sousa", sexo: "M", nascimento: "09/05/2013" },
+      { id: 2, nome: "Ana Júlia Nascimento dos Santos", sexo: "F", nascimento: "25/10/2013" },
+      { id: 3, nome: "Davi Viana Costa", sexo: "M", nascimento: "15/12/2013" },
+      { id: 4, nome: "Franciclelson de Almeida Lima", sexo: "M", nascimento: "31/10/2013" },
+      { id: 5, nome: "Francisca Vitória da Silva Marques", sexo: "F", nascimento: "11/12/2013" },
+      { id: 6, nome: "Francisco Gabriel dos Santos Paiva", sexo: "M", nascimento: "08/06/2012" },
+      { id: 7, nome: "Francivaldo Filho da Silva Santos", sexo: "M", nascimento: "29/09/2012" },
+      { id: 8, nome: "Hudson Talles da Conceição", sexo: "M", nascimento: "01/04/2013" },
+      { id: 9, nome: "Jamily Vieira Castro", sexo: "F", nascimento: "29/10/2013" },
+      { id: 10, nome: "Jeferson Yago de Sousa da Conceição", sexo: "M", nascimento: "04/07/2013" },
+      { id: 11, nome: "Jorge Petrus Nunes da Conceição Sales", sexo: "M", nascimento: "19/05/2013" },
+      { id: 12, nome: "João Lucas Silva Fernandes", sexo: "M", nascimento: "19/06/2013" },
+      { id: 13, nome: "Maria Izadora Rocha da Conceição", sexo: "F", nascimento: "17/05/2013" },
+      { id: 14, nome: "Maycon Borges Sobral", sexo: "M", nascimento: "06/06/2013" },
+      { id: 15, nome: "Nickolas José Alves Rodrigues", sexo: "M", nascimento: "09/09/2013" },
+      { id: 16, nome: "Nicoly Lorrany Marques da Silva", sexo: "F", nascimento: "31/03/2014" },
+      { id: 17, nome: "Richarlison dos Santos Sousa", sexo: "M", nascimento: "18/06/2013" },
+      { id: 18, nome: "Stelma Morgana Miranda Lima", sexo: "F", nascimento: "17/10/2013" },
+      { id: 19, nome: "Thalia Maria Miranda Melo", sexo: "F", nascimento: "31/05/2013" }
+    ]
+  },
+  {
+    id: "8ANO_MAT", nome: "8º Ano - Mat.", turno: "Matutino",
+    alunos: [
+      { id: 1, nome: "Antonio Adryan Frazão Conceição", sexo: "M", nascimento: "28/02/2013" },
+      { id: 2, nome: "Antonio Lucas Sousa da Silva", sexo: "M", nascimento: "09/08/2012" },
+      { id: 3, nome: "Antonio Pereira da Silva Neto", sexo: "M", nascimento: "04/12/2012" },
+      { id: 4, nome: "Bruna Karla Lima da Conceição", sexo: "F", nascimento: "07/08/2012" },
+      { id: 5, nome: "Carlos Eduardo Silva Araujo", sexo: "M", nascimento: "04/12/2012" },
+      { id: 6, nome: "Davi dos Reis Frazão", sexo: "M", nascimento: "20/03/2013" },
+      { id: 7, nome: "Emanuel Calleb da Silva Morais", sexo: "M", nascimento: "02/08/2012" },
+      { id: 8, nome: "Emelly Vitória Conceição da Silva", sexo: "F", nascimento: "13/03/2013" },
+      { id: 9, nome: "Francisca Viana da Conceição", sexo: "F", nascimento: "03/01/2012" },
+      { id: 10, nome: "Graziele Silva da Conceição", sexo: "F", nascimento: "03/06/2012" },
+      { id: 11, nome: "Guilhermy Henryque dos Santos Bezerra", sexo: "M", nascimento: "11/04/2012" },
+      { id: 12, nome: "Helloá Cristina Araujo da Silva", sexo: "F", nascimento: "16/04/2012" },
+      { id: 13, nome: "Hemily Gabriely Mauricio de Araujo", sexo: "F", nascimento: "13/03/2013" },
+      { id: 14, nome: "Jaelson de Sousa Delfino", sexo: "M", nascimento: "16/06/2012" },
+      { id: 15, nome: "Joane da Silva de Almeida", sexo: "F", nascimento: "20/05/2012" },
+      { id: 16, nome: "João Marcelo Santos Soares", sexo: "M", nascimento: "29/03/2013" },
+      { id: 17, nome: "Laisa Emanuele da Cruz Carvalho", sexo: "F", nascimento: "20/02/2013" },
+      { id: 18, nome: "José Yuri Silva das Chagas", sexo: "M", nascimento: "17/12/2013" },
+      { id: 19, nome: "Lohanna da Silva Pereira", sexo: "F", nascimento: "03/04/2012" },
+      { id: 20, nome: "Luan Rickelmy Leal da Silva", sexo: "M", nascimento: "19/05/2012" },
+      { id: 21, nome: "Marcos Artur Marques Sampaio", sexo: "M", nascimento: "01/08/2012" },
+      { id: 22, nome: "Maria Lissandra Cantanhede Fernandes", sexo: "F", nascimento: "02/12/2012", especial: "Síndrome de Down" },
+      { id: 23, nome: "Monick Emanuelly Nascimento Gomes", sexo: "M", nascimento: "22/09/2012" },
+      { id: 24, nome: "Pabllo Oliveira Ericeira", sexo: "M", nascimento: "16/05/2012" },
+      { id: 25, nome: "Pablo Thierry Silva Pinheiro", sexo: "M", nascimento: "19/05/2012" },
+      { id: 26, nome: "Pedro Miguell Amorim de Souza", sexo: "M", nascimento: "19/04/2013" },
+      { id: 27, nome: "Pedro Victor Bizerra Sousa", sexo: "M", nascimento: "14/02/2012" },
+      { id: 28, nome: "Ray da Conceição Araujo", sexo: "M", nascimento: "03/11/2012" },
+      { id: 29, nome: "Renato Oliveira Costa", sexo: "M", nascimento: "08/10/2012" },
+      { id: 30, nome: "Sarah Gabriely Lima dos Reis", sexo: "F", nascimento: "19/07/2012" }
+    ]
+  },
+  {
+    id: "9ANO_A_MAT", nome: "9º Ano A - Mat.", turno: "Matutino",
+    alunos: [
+      { id: 1, nome: "Almir de Souza Fernandes", sexo: "M", nascimento: "17/08/2011" },
+      { id: 2, nome: "Ana Clara Silva e Silva", sexo: "F", nascimento: "03/04/2011" },
+      { id: 3, nome: "Caio Levy da Conceição Soares", sexo: "M", nascimento: "09/11/2011" },
+      { id: 4, nome: "Carlos Eduardo Viana Neves", sexo: "M", nascimento: "02/05/2011" },
+      { id: 5, nome: "Fabrício da Conceição Costa", sexo: "M", nascimento: "15/04/2011" },
+      { id: 6, nome: "Fernanda Raissa Pereira Lopes", sexo: "F", nascimento: "17/06/2011" },
+      { id: 7, nome: "Ingrid Lorrane Araujo Pinto", sexo: "F", nascimento: "18/04/2012" },
+      { id: 8, nome: "João Pedro Alves Lago", sexo: "M", nascimento: "25/06/2011" },
+      { id: 9, nome: "Karlos Eduardo Neves da Silva", sexo: "M", nascimento: "07/03/2012" },
+      { id: 10, nome: "Leví Mateus Pereira de Sousa", sexo: "M", nascimento: "10/05/2011" },
+      { id: 11, nome: "Ludmylla Victoria Silva de Jesus", sexo: "F", nascimento: "22/03/2012" },
+      { id: 12, nome: "Marcos Vinícius Silva e Silva", sexo: "M", nascimento: "06/03/2012" },
+      { id: 13, nome: "Maria Emanuele dos Santos Silva", sexo: "F", nascimento: "11/06/2011" },
+      { id: 14, nome: "Maria Gabriela Moreira do Carmo", sexo: "F", nascimento: "27/05/2011" },
+      { id: 15, nome: "Maria Juliana Pereira da Silva", sexo: "F", nascimento: "23/10/2011" },
+      { id: 16, nome: "Maria Vitória Morais Silva", sexo: "F", nascimento: "23/06/2011" },
+      { id: 17, nome: "Marta Kamila Vieira Castro", sexo: "F", nascimento: "25/05/2011" },
+      { id: 18, nome: "Maurycio Nascimento Silva", sexo: "M", nascimento: "16/11/2011" },
+      { id: 19, nome: "Pedro Thiago Rodrigues Gonçalves", sexo: "M", nascimento: "25/01/2010" },
+      { id: 20, nome: "Raimundo Italo Marques Veras", sexo: "M", nascimento: "31/08/2011" },
+      { id: 21, nome: "Rayan da Silva Pinto", sexo: "M", nascimento: "01/07/2011" },
+      { id: 22, nome: "Riquelme Santos de Oliveira", sexo: "M", nascimento: "01/08/2012" },
+      { id: 23, nome: "Ruan Guilherme Silva de Melo Pereira", sexo: "M", nascimento: "06/03/2012" },
+      { id: 24, nome: "Tycyany Esteher Santos Neres", sexo: "F", nascimento: "27/04/2011" },
+      { id: 25, nome: "Wederson Neves de Sousa", sexo: "M", nascimento: "22/05/2011" },
+      { id: 26, nome: "Wesley Sousa Alves", sexo: "M", nascimento: "10/05/2011" }
+    ]
+  },
+  {
+    id: "9ANO_B_MAT", nome: "9º Ano B - Mat.", turno: "Matutino",
+    alunos: [
+      { id: 1, nome: "Alan Kauê Costa dos Santos", sexo: "M", nascimento: "08/12/2011" },
+      { id: 2, nome: "Ariádnes Andrade de Sousa", sexo: "F", nascimento: "31/08/2011", especial: "Retardo mental moderado com comprometimento significativo do comportamento" },
+      { id: 3, nome: "Bianca Aguiar Santos", sexo: "F", nascimento: "05/04/2011" },
+      { id: 4, nome: "Davi Lucas da Silva Carvalho", sexo: "M", nascimento: "25/05/2011" },
+      { id: 5, nome: "Genison Filho Sousa Cantanhede", sexo: "M", nascimento: "19/01/2011" },
+      { id: 6, nome: "Guilherme Santiago Rodrigues dos Santos", sexo: "M", nascimento: "14/10/2011" },
+      { id: 7, nome: "Heverton Caio dos Santos Sousa", sexo: "M", nascimento: "23/12/2012" },
+      { id: 8, nome: "Jailson Ryan Santos dos Reis", sexo: "M", nascimento: "02/10/2011" },
+      { id: 9, nome: "Kaila Katleia da Conceição Freire", sexo: "F", nascimento: "19/02/2012" },
+      { id: 10, nome: "Kaio Eduardo Nascimento dos Santos", sexo: "M", nascimento: "22/09/2011" },
+      { id: 11, nome: "Karla Muryel de Brito da Silva", sexo: "F", nascimento: "19/05/2011" },
+      { id: 12, nome: "Kethely Vitoria dos Santos Machado", sexo: "F", nascimento: "19/06/2011" },
+      { id: 13, nome: "Lara Mylena Pereira Rodrigues", sexo: "F", nascimento: "02/10/2011" },
+      { id: 14, nome: "Joao Pedro Leite Fernandes", sexo: "M", nascimento: "31/03/2013" },
+      { id: 15, nome: "José Guilherme da Silva Costa", sexo: "M", nascimento: "01/12/2011" },
+      { id: 16, nome: "Lazaro Miguel Oliveira de Sousa", sexo: "M", nascimento: "13/07/2011" },
+      { id: 17, nome: "Marcela da Conceição Neves", sexo: "F", nascimento: "29/08/2011" },
+      { id: 18, nome: "Maria Júlia Pereira da Silva", sexo: "F", nascimento: "23/10/2011" },
+      { id: 19, nome: "Mateus Vitor de Sousa Damaso", sexo: "M", nascimento: "22/03/2012" },
+      { id: 20, nome: "Maycon Nascimento Silva", sexo: "M", nascimento: "16/11/2011" },
+      { id: 21, nome: "Raimunda Maisa de Oliveira Viana", sexo: "F", nascimento: "18/10/2011" },
+      { id: 22, nome: "Raissa Nicolly Pontes Mendonça", sexo: "F", nascimento: "21/09/2011" },
+      { id: 23, nome: "Rayellen Cristina Oliveira Queiroz", sexo: "F", nascimento: "22/12/2011" },
+      { id: 24, nome: "Sérgio da Conceição Filho", sexo: "M", nascimento: "09/05/2011" },
+      { id: 25, nome: "Vitor Silva da Conceição", sexo: "M", nascimento: "23/04/2011" },
+      { id: 26, nome: "Williana Leticia Santos Soares", sexo: "F", nascimento: "01/08/2011" }
+    ]
+  }
+];
+
+// ==================== STATE ====================
+let selectedTurma = null;
+window.alunoData = {};
+let alunoData = window.alunoData;
+
+const LS_KEY = 'nohemia_data_2026';
+const LS_ADMIN = 'nohemia_admin_2026';
+
+// ==================== LOCALSTORAGE ====================
+function saveAll() {
+  // No-op: individual saves handle Firebase sync
+  showToast();
+}
+
+function saveDado(turmaId, alunoId) {
+  const k = getKey(turmaId, alunoId);
+  const d = alunoData[k];
+  if (!d) return;
+  const toSave = { faltas: d.faltas || {}, avaliacao: d.avaliacao, responsavel: d.responsavel, obs: d.obs || '' };
+  window.fbSave('dados/' + k, toSave);
+  showToast();
+}
+
+function loadAll() {
+  // Data loaded via Firebase listener (fbListen in module script)
+  // Show loading state
+  document.getElementById('alunosContainer').innerHTML = 
+    '<div class="empty-state"><div class="icon">🔄</div><p>Conectando ao servidor...</p></div>';
+}
+
+function saveAdmin() {
+  const admin = {
+    cmdColegio: document.getElementById('cmd-colegio').value,
+    subcmd: document.getElementById('subcmd-colegio').value,
+    chefAdm: document.getElementById('chef-adm').value,
+    cmdCorpo: document.getElementById('cmd-corpo').value,
+    mon: [1,2,3,4,5,6].map(i => document.getElementById('mon'+i).value)
+  };
+  window.fbSave('admin', admin);
+  showToast();
+}
+
+function loadAdmin() {
+  // Loaded via Firebase listener
+}
+
+let toastTimer;
+function showToast() {
+  const t = document.getElementById('saveToast');
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 1500);
+}
+
+// ==================== NIVEL DE COR ====================
+function calcNivel(avaliacao) {
+  const campos = ['disciplina','ordemUnida','apresentacao','habilFisica','habilPortugues','habilMatematica'];
+  const pontos = campos.map(c => avaliacao[c] === 'alterado' ? 2 : avaliacao[c] === 'regular' ? 1 : 0);
+  const familiar = avaliacao.familiar === 'hostil' ? 2 : 0;
+  pontos.push(familiar);
+  const total = pontos.reduce((a,b) => a+b, 0);
+  if (total === 0) return 'neutro';
+  const pct = total / 14;
+  if (pct <= 0.10) return 'verde-forte';
+  if (pct <= 0.28) return 'verde-fraco';
+  if (pct <= 0.50) return 'amarelo';
+  if (pct <= 0.72) return 'laranja';
+  return 'vermelho';
+}
+
+function getNivelLabel(nivel) {
+  return {'neutro':'⬜ Não avaliado','verde-forte':'🟢 Ótimo','verde-fraco':'🟢 Bom','amarelo':'🟡 Regular','laranja':'🟠 Atenção','vermelho':'🔴 Crítico'}[nivel] || '';
+}
+
+function atualizarNivelCard(turmaId, alunoId) {
+  const data = getData(turmaId, alunoId);
+  const nivel = calcNivel(data.avaliacao);
+  const nc = 'nivel-' + nivel;
+  const stripe = document.getElementById('stripe-' + turmaId + '-' + alunoId);
+  const badge  = document.getElementById('badge-'  + turmaId + '-' + alunoId);
+  if (stripe) { stripe.className = 'status-stripe ' + nc; stripe.title = getNivelLabel(nivel); }
+  if (badge)  { badge.className  = 'nivel-badge '   + nc; badge.title  = getNivelLabel(nivel); }
+}
+
+// ==================== HELPERS ====================
+function getKey(turmaId, alunoId) { return `${turmaId}_${alunoId}`; }
+
+function getDefaultData() {
+  return {
+    faltas: {},
+    avaliacao: { disciplina: 'padrao', ordemUnida: 'padrao', apresentacao: 'padrao', habilFisica: 'padrao', habilPortugues: 'padrao', habilMatematica: 'padrao', familiar: 'receptivo' },
+    responsavel: { nome: '', telefone: '' },
+    foto: null,
+    obs: ''
+  };
+}
+
+function getData(turmaId, alunoId) {
+  const k = getKey(turmaId, alunoId);
+  if (!alunoData[k]) alunoData[k] = getDefaultData();
+  return alunoData[k];
+}
+
+function calcIdade(nascStr) {
+  const [d, m, y] = nascStr.split('/').map(Number);
+  const nasc = new Date(y, m-1, d);
+  const hoje = new Date();
+  let idade = hoje.getFullYear() - nasc.getFullYear();
+  const mDiff = hoje.getMonth() - nasc.getMonth();
+  if (mDiff < 0 || (mDiff === 0 && hoje.getDate() < nasc.getDate())) idade--;
+  return idade;
+}
+
+function getWorkdays(year, month) {
+  const days = [];
+  const daysInMonth = new Date(year, month, 0).getDate();
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dow = new Date(year, month-1, d).getDay();
+    if (dow >= 1 && dow <= 5) days.push(d);
+  }
+  return days;
+}
+
+function getFaltaCount(turmaId, alunoId, year, month) {
+  const data = getData(turmaId, alunoId);
+  return Object.keys(data.faltas).filter(k => k.startsWith(`${year}-${month}-`)).length;
+}
+
+// ==================== UI HELPERS ====================
+function toggleAdmin() {
+  document.getElementById('adminSection').classList.toggle('open');
+}
+
+// ==================== RENDER TURMA BUTTONS ====================
+function renderTurmaButtons() {
+  const grid = document.getElementById('turmaGrid');
+  grid.innerHTML = '';
+  turmas.forEach(t => {
+    const btn = document.createElement('button');
+    btn.className = 'turma-btn' + (selectedTurma === t.id ? ' active' : '');
+    btn.textContent = t.nome;
+    btn.onclick = () => selectTurma(t.id);
+    grid.appendChild(btn);
+  });
+}
+
+function selectTurma(id) {
+  selectedTurma = id;
+  renderTurmaButtons();
+  document.getElementById('controlsBar').style.display = 'flex';
+  const turma = turmas.find(t => t.id === id);
+  document.getElementById('turmaInfoBadge').textContent = `${turma.alunos.length} alunos`;
+  renderAlunoList();
+  // Scroll to list
+  setTimeout(() => document.getElementById('alunosContainer').scrollIntoView({behavior:'smooth', block:'start'}), 100);
+}
+
+// ==================== RENDER ALUNOS ====================
+function renderAlunoList() {
+  if (!selectedTurma) return;
+  const turma = turmas.find(t => t.id === selectedTurma);
+  const month = parseInt(document.getElementById('monthSelect').value);
+  const year = 2026;
+  const workdays = getWorkdays(year, month);
+  const search = (document.getElementById('searchInput').value || '').toLowerCase().trim();
+
+  const monthNames = ['','Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+  const container = document.getElementById('alunosContainer');
+  container.innerHTML = '';
+
+  let alunos = turma.alunos;
+  if (search) alunos = alunos.filter(a => a.nome.toLowerCase().includes(search));
+
+  if (alunos.length === 0) {
+    container.innerHTML = `<div class="empty-state"><div class="icon">🔍</div><p>Nenhum aluno encontrado</p></div>`;
+    return;
+  }
+
+  const list = document.createElement('div');
+  list.className = 'alunos-list';
+
+  alunos.forEach(aluno => {
+    const data = getData(turma.id, aluno.id);
+    const faltaCount = getFaltaCount(turma.id, aluno.id, year, month);
+    const idade = calcIdade(aluno.nascimento);
+    const iniciais = aluno.nome.split(' ').slice(0,2).map(n=>n[0]).join('');
+    const nivel = calcNivel(data.avaliacao);
+    const nivelClass = 'nivel-' + nivel;
+
+    const card = document.createElement('div');
+    card.className = 'aluno-card' + (aluno.especial ? ' especial' : '');
+
+    card.innerHTML = `
+      <div class="status-stripe ${nivelClass}" id="stripe-${turma.id}-${aluno.id}" title="${getNivelLabel(nivel)}"></div>
+      <div class="aluno-header" onclick="toggleCard(this)">
+        <div class="aluno-foto-area">
+          <div class="aluno-foto" id="foto-${turma.id}-${aluno.id}">
+            ${data.foto ? '<img src="' + data.foto + '" alt="">' : '<span>' + iniciais + '</span>'}
+          </div>
+          <button class="foto-upload-btn" onclick="event.stopPropagation(); uploadFoto(this)" data-tid="${turma.id}" data-aid="${aluno.id}" title="Foto">📷</button>
+          <input type="file" class="foto-input" id="foto-input-${turma.id}-${aluno.id}" accept="image/*">
+        </div>
+
+        <div class="aluno-info">
+          <div class="aluno-nome">
+            ${aluno.nome}
+            <span class="nivel-badge ${nivelClass}" id="badge-${turma.id}-${aluno.id}" title="${getNivelLabel(nivel)}"></span>
+          </div>
+          <div class="aluno-meta">
+            <span>${aluno.sexo === 'M' ? '👦' : '👧'} ${idade}a</span>
+            <span>📅 ${aluno.nascimento}</span>
+            ${aluno.especial ? '<span class="especial-badge tooltip-container" onclick="event.stopPropagation(); this.classList.toggle(\'tapped\')">⚠️ ATÍPICO<div class="tooltip-box">' + aluno.especial + '</div></span>' : ''}
+          </div>
+        </div>
+
+        <div class="header-right">
+          <div class="faltas-quick">
+            <div class="falta-count ${faltaCount >= 5 ? 'alerta' : ''}" id="falta-count-${turma.id}-${aluno.id}">${faltaCount}</div>
+            <div class="falta-label">Faltas</div>
+            <span class="falta-alert-icon" id="falta-icon-${turma.id}-${aluno.id}" style="display:${faltaCount>=5?'inline':'none'}">⚠️</span>
+          </div>
+          <button class="btn-falta" onclick="event.stopPropagation(); faltaHoje(this)" data-tid="${turma.id}" data-aid="${aluno.id}">
+            📌<br>HOJE
+          </button>
+          <div class="expand-arrow" id="arrow-${turma.id}-${aluno.id}">▼</div>
+        </div>
+      </div>
+
+      <div class="aluno-body" id="body-${turma.id}-${aluno.id}">
+        <div class="aluno-body-grid">
+
+          <div>
+            <div class="section-label">📊 Avaliação Comportamental e Acadêmica</div>
+            <div class="avaliacao-grid">
+              ${renderSelect(turma.id, aluno.id, 'disciplina', 'Disciplina')}
+              ${renderSelect(turma.id, aluno.id, 'ordemUnida', 'Ordem Unida')}
+              ${renderSelect(turma.id, aluno.id, 'apresentacao', 'Apresentação')}
+              ${renderSelect(turma.id, aluno.id, 'habilFisica', 'Hab. Física')}
+              ${renderSelect(turma.id, aluno.id, 'habilPortugues', 'Português')}
+              ${renderSelect(turma.id, aluno.id, 'habilMatematica', 'Matemática')}
+            </div>
+
+            <div style="margin-top:14px;">
+              <div class="section-label">👨‍👩‍👧 Relação Familiar</div>
+              <select class="familiar-select ${data.avaliacao.familiar}"
+                id="familiar-${turma.id}-${aluno.id}"
+                onchange="updateFamiliar('${turma.id}', ${aluno.id}, this)">
+                <option value="receptivo" ${data.avaliacao.familiar==='receptivo'?'selected':''}>✅ Receptivo</option>
+                <option value="hostil" ${data.avaliacao.familiar==='hostil'?'selected':''}>⛔ Hostil</option>
+              </select>
+            </div>
+
+            <div style="margin-top:14px;">
+              <div class="section-label">📞 Responsável</div>
+              <div class="responsavel-grid">
+                <div class="responsavel-field">
+                  <label>Nome do Responsável</label>
+                  <input type="text" placeholder="Nome completo" value="${data.responsavel.nome}"
+                    onchange="updateResponsavel('${turma.id}', ${aluno.id}, 'nome', this.value)">
+                </div>
+                <div class="responsavel-field">
+                  <label>Telefone</label>
+                  <input type="tel" placeholder="(98) 9XXXX-XXXX" value="${data.responsavel.telefone}"
+                    onchange="updateResponsavel('${turma.id}', ${aluno.id}, 'telefone', this.value)">
+                </div>
+              </div>
+            </div>
+
+            <div style="margin-top:14px;">
+              <div class="section-label">📝 Observações</div>
+              <textarea class="obs-textarea" placeholder="Observações sobre o aluno..."
+                onchange="updateObs('${turma.id}', ${aluno.id}, this.value)">${data.obs}</textarea>
+            </div>
+          </div>
+
+          <div>
+            <div class="section-label">📅 Faltas — ${monthNames[month]} 2026</div>
+            <div class="faltas-month-days">
+              ${workdays.map(d => {
+                const k = year+'-'+month+'-'+d;
+                const isFalta = !!data.faltas[k];
+                const cls = 'day-btn' + (isFalta ? ' falta' : '');
+                return '<button class="' + cls + '" id="day-' + turma.id + '-' + aluno.id + '-' + d + '" data-tid="' + turma.id + '" data-aid="' + aluno.id + '" data-year="' + year + '" data-month="' + month + '" data-day="' + d + '" onclick="toggleFaltaBtn(this)">' + d + '</button>';
+              }).join('')}
+            </div>
+            <div class="faltas-summary" id="faltas-sum-${turma.id}-${aluno.id}">
+              <span class="count" style="color:${faltaCount >= 5 ? '#c0392b' : '#2d3a1e'}">${faltaCount}</span>
+              <span style="color:#666;font-size:.85rem">falta${faltaCount !== 1 ? 's' : ''} no mês</span>
+              ${faltaCount >= 5 ? '<span class="warning">⚠️ ATENÇÃO: 5+ faltas!</span>' : ''}
+            </div>
+            <div class="faltas-hint">🟥 = Falta · Toque no dia para marcar/desmarcar</div>
+          </div>
+
+        </div>
+      </div>
+    `;
+    list.appendChild(card);
+  });
+
+  container.appendChild(list);
+}
+
+function renderSelect(turmaId, alunoId, field, label) {
+  const data = getData(turmaId, alunoId);
+  const val = data.avaliacao[field];
+  return `
+    <div class="avaliacao-item">
+      <label>${label}</label>
+      <select class="status-select ${val}" id="sel-${turmaId}-${alunoId}-${field}"
+        onchange="updateAvaliacao('${turmaId}', ${alunoId}, '${field}', this)">
+        <option value="padrao" ${val==='padrao'?'selected':''}>✅ Padrão</option>
+        <option value="regular" ${val==='regular'?'selected':''}>⚠️ Regular</option>
+        <option value="alterado" ${val==='alterado'?'selected':''}>🔴 Alterado</option>
+      </select>
+    </div>`;
+}
+
+// ==================== INTERACTIONS ====================
+function toggleCard(el) {
+  // el = the .aluno-header div clicked
+  const card = el.closest('.aluno-card');
+  const body = card.querySelector('.aluno-body');
+  const arrow = card.querySelector('.expand-arrow');
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function toggleFaltaBtn(btn) {
+  toggleFalta(btn.dataset.tid, parseInt(btn.dataset.aid), parseInt(btn.dataset.year), parseInt(btn.dataset.month), parseInt(btn.dataset.day));
+}
+
+function toggleFalta(turmaId, alunoId, year, month, day) {
+  const data = getData(turmaId, alunoId);
+  const k = `${year}-${month}-${day}`;
+  if (data.faltas[k]) delete data.faltas[k];
+  else data.faltas[k] = true;
+  updateAlunoHeader(turmaId, alunoId);
+  updateFaltaDay(turmaId, alunoId, year, month, day);
+  updateFaltaSummary(turmaId, alunoId, year, month);
+  saveAll();
+}
+
+function updateAlunoHeader(turmaId, alunoId) {
+  const month = parseInt(document.getElementById('monthSelect').value);
+  const cnt = getFaltaCount(turmaId, alunoId, 2026, month);
+  const el = document.getElementById(`falta-count-${turmaId}-${alunoId}`);
+  if (el) { el.textContent = cnt; el.className = 'falta-count' + (cnt >= 5 ? ' alerta' : ''); }
+  const icon = document.getElementById(`falta-icon-${turmaId}-${alunoId}`);
+  if (icon) icon.style.display = cnt >= 5 ? 'inline' : 'none';
+}
+
+function updateFaltaDay(turmaId, alunoId, year, month, day) {
+  const data = getData(turmaId, alunoId);
+  const k = year + '-' + month + '-' + day;
+  const btn = document.getElementById('day-' + turmaId + '-' + alunoId + '-' + day);
+  if (btn) btn.className = 'day-btn' + (data.faltas[k] ? ' falta' : '');
+}
+
+function updateFaltaSummary(turmaId, alunoId, year, month) {
+  const cnt = getFaltaCount(turmaId, alunoId, year, month);
+  const el = document.getElementById(`faltas-sum-${turmaId}-${alunoId}`);
+  if (el) {
+    el.innerHTML = `<span class="count" style="color:${cnt >= 5 ? '#c0392b' : '#2d3a1e'}">${cnt}</span>
+      <span style="color:#666;font-size:.85rem">falta${cnt !== 1 ? 's' : ''} no mês</span>
+      ${cnt >= 5 ? '<span class="warning">⚠️ ATENÇÃO: 5+ faltas!</span>' : ''}`;
+  }
+}
+
+function updateAvaliacao(turmaId, alunoId, field, sel) {
+  const data = getData(turmaId, alunoId);
+  data.avaliacao[field] = sel.value;
+  sel.className = `status-select ${sel.value}`;
+  atualizarNivelCard(turmaId, alunoId);
+  saveDado(turmaId, alunoId);
+}
+
+function updateFamiliar(turmaId, alunoId, sel) {
+  const data = getData(turmaId, alunoId);
+  data.avaliacao.familiar = sel.value;
+  sel.className = `familiar-select ${sel.value}`;
+  atualizarNivelCard(turmaId, alunoId);
+  saveDado(turmaId, alunoId);
+}
+
+function updateResponsavel(turmaId, alunoId, field, val) {
+  getData(turmaId, alunoId).responsavel[field] = val;
+  saveDado(turmaId, alunoId);
+}
+
+function updateObs(turmaId, alunoId, val) {
+  getData(turmaId, alunoId).obs = val;
+  saveDado(turmaId, alunoId);
+}
+
+function uploadFoto(btn) {
+  const tid = btn.dataset.tid;
+  const aid = btn.dataset.aid;
+  const input = document.getElementById('foto-input-' + tid + '-' + aid);
+  if (!input) return;
+  input.onchange = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const data = getData(tid, parseInt(aid));
+      data.foto = e.target.result;
+      const fotoEl = document.getElementById('foto-' + tid + '-' + aid);
+      if (fotoEl) fotoEl.innerHTML = '<img src="' + e.target.result + '" alt="">';
+      saveAll();
+    };
+    reader.readAsDataURL(file);
+  };
+  input.click();
+}
+
+function loadFoto(event, turmaId, alunoId) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const data = getData(turmaId, alunoId);
+    data.foto = e.target.result;
+    const fotoEl = document.getElementById('foto-' + turmaId + '-' + alunoId);
+    if (fotoEl) fotoEl.innerHTML = '<img src="' + e.target.result + '" alt="">';
+    window.fbSave('fotos/' + turmaId + '_' + alunoId, { foto: e.target.result });
+    showToast();
+  };
+  reader.readAsDataURL(file);
+}
+
+function faltaHoje(btn) {
+  const tid = btn.dataset.tid;
+  const aid = parseInt(btn.dataset.aid);
+  const today = new Date();
+  const month = parseInt(document.getElementById('monthSelect').value);
+  toggleFalta(tid, aid, 2026, month, today.getDate());
+  const body = document.getElementById('body-' + tid + '-' + aid);
+  const arrow = document.getElementById('arrow-' + tid + '-' + aid);
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    arrow.classList.add('open');
+  }
+}
+
+function marcarFaltaHoje(turmaId, alunoId) {
+  const today = new Date();
+  const month = parseInt(document.getElementById('monthSelect').value);
+  toggleFalta(turmaId, alunoId, 2026, month, today.getDate());
+  const body = document.getElementById('body-' + turmaId + '-' + alunoId);
+  const arrow = document.getElementById('arrow-' + turmaId + '-' + alunoId);
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    arrow.classList.add('open');
+  }
+}
+
+// ==================== INIT ====================
+// Online/offline indicator
+window.addEventListener('online',  () => { const el = document.getElementById('onlineStatus'); if(el){el.style.background='#27ae60';el.textContent='🟢 ON';el.style.display='block';} });
+window.addEventListener('offline', () => { const el = document.getElementById('onlineStatus'); if(el){el.style.background='#c0392b';el.textContent='🔴 OFF';el.style.display='block';} });
+
+loadAll();
+loadAdmin();
+renderTurmaButtons();
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js')
+      .then(reg => console.log('SW registrado:', reg.scope))
+      .catch(err => console.log('SW erro:', err));
+  });
+}
+</script>
+</body>
+</html>
