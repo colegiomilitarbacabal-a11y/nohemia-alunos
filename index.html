@@ -1053,14 +1053,6 @@ body {
     </div>
   </div>
 
-
-<!-- Calendar Popup -->
-<div class="cal-overlay" id="calOverlay" onclick="calOverlayClick(event)">
-  <div class="cal-box">
-    <div class="cal-header">
-      <h3 id="calAlunoNome">Registrar Falta</h3>
-      <button class="cal-close" onclick="fecharCal()">✕</button>
-    </div>
     <div class="cal-month-nav">
       <button onclick="calNavMes(-1)">◀</button>
       <span id="calMonthLabel"></span>
@@ -1693,8 +1685,8 @@ function renderAlunoList() {
             <div class="falta-label">Faltas</div>
             <span class="falta-alert-icon" id="falta-icon-${turma.id}-${aluno.id}" style="display:${faltaCount>=5?'inline':'none'}">⚠️</span>
           </div>
-          <button class="btn-falta" onclick="event.stopPropagation(); abrirCal(this)" data-tid="${turma.id}" data-aid="${aluno.id}" data-nome="${aluno.nome}">
-            📌<br>FALTA
+          <button class="btn-falta" onclick="event.stopPropagation(); marcarHoje(this)" data-tid="${turma.id}" data-aid="${aluno.id}">
+            📌<br>HOJE
           </button>
           <div class="expand-arrow" id="arrow-${turma.id}-${aluno.id}">▼</div>
         </div>
@@ -1748,28 +1740,25 @@ function renderAlunoList() {
           </div>
 
           <div>
-            <div class="section-label">📅 Registro de Faltas — ${monthNames[month]} 2026</div>
-            <div class="faltas-mes-badge" id="faltas-sum-${turma.id}-${aluno.id}">
-              <span class="num ${faltaCount >= 5 ? 'alerta' : ''}" id="falta-num-${turma.id}-${aluno.id}">${faltaCount}</span>
-              <span class="txt">Falta${faltaCount !== 1 ? 's' : ''}<br>no mês</span>
+            <div class="section-label">📅 Registro de Faltas — \${monthNames[month]} 2026</div>
+            
+            <!-- Falta count badge -->
+            <div class="faltas-mes-badge" id="faltas-sum-\${turma.id}-\${aluno.id}">
+              <span class="num \${faltaCount >= 5 ? 'alerta' : ''}" id="falta-num-\${turma.id}-\${aluno.id}">\${faltaCount}</span>
+              <span class="txt">Falta\${faltaCount !== 1 ? 's' : ''}<br>no mês</span>
               ${faltaCount >= 5 ? '<span class="warn-icon">⚠️</span>' : ''}
             </div>
-            <div style="margin-top:10px;">
-              <div class="section-label" style="margin-bottom:8px;">Dias com falta:</div>
-              <div id="faltas-dias-${turma.id}-${aluno.id}" style="display:flex;flex-wrap:wrap;gap:5px;">
-                ${Object.keys(data.faltas).filter(k => k.startsWith(year+'-'+month+'-')).sort((a,b) => {
-                  const da = parseInt(a.split('-')[2]), db = parseInt(b.split('-')[2]);
-                  return da - db;
-                }).map(k => {
-                  const d = k.split('-')[2];
-                  return '<span style="background:var(--red-alert);color:white;border-radius:6px;padding:4px 10px;font-family:Oswald,sans-serif;font-size:0.85rem;font-weight:700;">'+d+'</span>';
-                }).join('') || '<span style="color:#aaa;font-size:0.82rem;">Nenhuma falta registrada</span>'}
-              </div>
+
+            <!-- Day buttons grid -->
+            <div class="faltas-dias-grid" style="margin-top:12px;">
+              ${workdays.map(d => {
+                const k = year+'-'+month+'-'+d;
+                const isFalta = !!data.faltas[k];
+                const cls = isFalta ? 'falta-dia-btn active' : 'falta-dia-btn';
+                return '<button class="' + cls + '" id="fdia-' + turma.id + '-' + aluno.id + '-' + d + '" data-tid="' + turma.id + '" data-aid="' + aluno.id + '" data-year="' + year + '" data-month="' + month + '" data-day="' + d + '" onclick="toggleFaltaBtn(this)">' + d + '</button>';
+              }).join('')}
             </div>
-            <button style="margin-top:12px;background:var(--olive2);color:var(--gold2);border:none;border-radius:8px;padding:10px 18px;font-family:Oswald,sans-serif;font-size:0.88rem;letter-spacing:1px;cursor:pointer;width:100%;" 
-              onclick="abrirCalDireto('${turma.id}', ${aluno.id}, '${aluno.nome}')">
-              📅 GERENCIAR FALTAS
-            </button>
+            <div style="margin-top:8px;font-size:0.75rem;color:#888;">🟥 Vermelho = falta · Toque no dia para marcar/desmarcar</div>
           </div>
 
         </div>
@@ -1808,7 +1797,81 @@ function toggleCard(el) {
 }
 
 function toggleFaltaBtn(btn) {
-  toggleFalta(btn.dataset.tid, parseInt(btn.dataset.aid), parseInt(btn.dataset.year), parseInt(btn.dataset.month), parseInt(btn.dataset.day));
+  const tid = btn.dataset.tid;
+  const aid = parseInt(btn.dataset.aid);
+  const year = parseInt(btn.dataset.year);
+  const month = parseInt(btn.dataset.month);
+  const day = parseInt(btn.dataset.day);
+  
+  const data = getData(tid, aid);
+  const k = year + '-' + month + '-' + day;
+  if (data.faltas[k]) delete data.faltas[k];
+  else data.faltas[k] = true;
+
+  // Update button visually
+  btn.className = data.faltas[k] ? 'falta-dia-btn active' : 'falta-dia-btn';
+
+  // Update header count
+  updateAlunoHeader(tid, aid);
+  updateFaltaSummaryBadge(tid, aid, year, month);
+
+  // Save
+  saveDado(tid, aid);
+}
+
+function marcarHoje(btn) {
+  const tid = btn.dataset.tid;
+  const aid = parseInt(btn.dataset.aid);
+  const today = new Date();
+  const month = parseInt(document.getElementById('monthSelect').value);
+  const year = 2026;
+  const day = today.getDate();
+
+  // Open card first
+  const card = btn.closest('.aluno-card');
+  const body = card.querySelector('.aluno-body');
+  const arrow = card.querySelector('.expand-arrow');
+  if (!body.classList.contains('open')) {
+    body.classList.add('open');
+    arrow.classList.add('open');
+  }
+
+  // Toggle falta for today
+  const data = getData(tid, aid);
+  const k = year + '-' + month + '-' + day;
+  if (data.faltas[k]) delete data.faltas[k];
+  else data.faltas[k] = true;
+
+  // Update day button
+  const dayBtn = document.getElementById('fdia-' + tid + '-' + aid + '-' + day);
+  if (dayBtn) dayBtn.className = data.faltas[k] ? 'falta-dia-btn active' : 'falta-dia-btn';
+
+  updateAlunoHeader(tid, aid);
+  updateFaltaSummaryBadge(tid, aid, year, month);
+  saveDado(tid, aid);
+
+  // Scroll to day button
+  if (dayBtn) dayBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function updateFaltaSummaryBadge(turmaId, alunoId, year, month) {
+  const cnt = getFaltaCount(turmaId, alunoId, year, month);
+  const numEl = document.getElementById('falta-num-' + turmaId + '-' + alunoId);
+  if (numEl) {
+    numEl.textContent = cnt;
+    numEl.className = 'num' + (cnt >= 5 ? ' alerta' : '');
+  }
+  const badge = document.getElementById('faltas-sum-' + turmaId + '-' + alunoId);
+  if (badge) {
+    const txt = badge.querySelector('.txt');
+    if (txt) txt.innerHTML = 'Falta' + (cnt !== 1 ? 's' : '') + '<br>no mês';
+    let warn = badge.querySelector('.warn-icon');
+    if (cnt >= 5 && !warn) {
+      const s = document.createElement('span');
+      s.className = 'warn-icon'; s.textContent = '⚠️';
+      badge.appendChild(s);
+    } else if (cnt < 5 && warn) warn.remove();
+  }
 }
 
 function toggleFalta(turmaId, alunoId, year, month, day) {
