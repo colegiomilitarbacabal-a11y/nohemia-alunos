@@ -1740,12 +1740,12 @@ function renderAlunoList() {
           </div>
 
           <div>
-            <div class="section-label">📅 Registro de Faltas — \${monthNames[month]} 2026</div>
+            <div class="section-label">📅 Registro de Faltas — ${monthNames[month]} 2026</div>
             
             <!-- Falta count badge -->
-            <div class="faltas-mes-badge" id="faltas-sum-\${turma.id}-\${aluno.id}">
-              <span class="num \${faltaCount >= 5 ? 'alerta' : ''}" id="falta-num-\${turma.id}-\${aluno.id}">\${faltaCount}</span>
-              <span class="txt">Falta\${faltaCount !== 1 ? 's' : ''}<br>no mês</span>
+            <div class="faltas-mes-badge" id="faltas-sum-${turma.id}-${aluno.id}">
+              <span class="num ${faltaCount >= 5 ? 'alerta' : ''}" id="falta-num-${turma.id}-${aluno.id}">${faltaCount}</span>
+              <span class="txt">Falta${faltaCount !== 1 ? 's' : ''}<br>no mês</span>
               ${faltaCount >= 5 ? '<span class="warn-icon">⚠️</span>' : ''}
             </div>
 
