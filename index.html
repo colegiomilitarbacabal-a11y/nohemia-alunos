@@ -889,8 +889,9 @@ body {
     } else {
       console.log('Firebase dados: VAZIO');
     }
-    // ALWAYS re-render when Firebase data arrives to show correct values
+    // Re-render only if a turma is currently selected
     if (window.selectedTurma && typeof window.renderAlunoList === 'function') {
+      console.log('Firebase re-rendering turma:', window.selectedTurma);
       window.renderAlunoList();
     }
     if (!window._fbReady) {
@@ -1411,7 +1412,8 @@ const turmas = [
 ];
 
 // ==================== STATE ====================
-let selectedTurma = null;
+window.selectedTurma = null;
+let selectedTurma = window.selectedTurma;
 window.alunoData = {};
 let alunoData = window.alunoData;
 
@@ -1623,17 +1625,23 @@ function renderTurmaButtons() {
 
 function selectTurma(id) {
   selectedTurma = id;
+  window.selectedTurma = id;
+  alunoData = window.alunoData;
   renderTurmaButtons();
   document.getElementById('controlsBar').style.display = 'flex';
   const turma = turmas.find(t => t.id === id);
-  document.getElementById('turmaInfoBadge').textContent = `${turma.alunos.length} alunos`;
+  document.getElementById('turmaInfoBadge').textContent = turma.alunos.length + ' alunos';
   renderAlunoList();
-  // Scroll to list
-  setTimeout(() => document.getElementById('alunosContainer').scrollIntoView({behavior:'smooth', block:'start'}), 100);
+  setTimeout(() => {
+    const el = document.getElementById('alunosContainer');
+    if (el) el.scrollIntoView({behavior:'smooth', block:'start'});
+  }, 100);
 }
 
 // ==================== RENDER ALUNOS ====================
 function renderAlunoList() {
+  alunoData = window.alunoData;
+  selectedTurma = window.selectedTurma;
   if (!selectedTurma) return;
   const turma = turmas.find(t => t.id === selectedTurma);
   const month = parseInt(document.getElementById('monthSelect').value);
@@ -1782,7 +1790,7 @@ function renderAlunoList() {
 
   container.appendChild(list);
 
-  // Event delegation for day buttons - works reliably on mobile
+  // Re-attach event delegation every render (container was replaced)
   container.addEventListener('click', function(e) {
     const btn = e.target.closest('.falta-dia-btn');
     if (!btn) return;
