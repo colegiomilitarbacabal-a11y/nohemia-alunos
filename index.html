@@ -878,12 +878,16 @@ body {
   onValue(ref(db, 'dados'), (snap) => {
     if (snap.exists()) {
       const val = snap.val();
+      console.log('Firebase dados recebidos:', JSON.stringify(val).substring(0, 500));
       // Merge: preserve fotos locais
       for (const k in val) {
         const localFoto = window.alunoData[k] ? window.alunoData[k].foto : null;
         window.alunoData[k] = val[k];
         if (localFoto) window.alunoData[k].foto = localFoto;
+        console.log('Aluno', k, 'avaliacao:', JSON.stringify(val[k].avaliacao));
       }
+    } else {
+      console.log('Firebase dados: VAZIO');
     }
     if (!window._fbReady) {
       window._fbReady = true;
@@ -1439,8 +1443,9 @@ function saveDado(turmaId, alunoId) {
   alunoData[k].avaliacao = toSave.avaliacao;
 
   // Salva no Firebase
+  console.log('Salvando no Firebase:', k, JSON.stringify(toSave.avaliacao));
   if (typeof window.fbSaveDado === 'function') {
-    window.fbSaveDado('dados/' + k, toSave);
+    window.fbSaveDado('dados/' + k, toSave).then(() => console.log('Firebase save OK:', k));
   } else {
     if (!window._saveQueue) window._saveQueue = [];
     window._saveQueue.push({ path: 'dados/' + k, data: toSave });
@@ -1807,7 +1812,8 @@ function renderAlunoList() {
 
 function renderSelect(turmaId, alunoId, field, label) {
   const data = getData(turmaId, alunoId);
-  const val = data.avaliacao[field] || 'nao_atribuido';
+  const val = (data.avaliacao && data.avaliacao[field]) ? data.avaliacao[field] : 'nao_atribuido';
+  console.log('renderSelect', field, '=', val, 'from', JSON.stringify(data.avaliacao));
   return `
     <div class="avaliacao-item">
       <label>${label}</label>
