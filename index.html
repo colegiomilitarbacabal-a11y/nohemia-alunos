@@ -889,6 +889,10 @@ body {
     } else {
       console.log('Firebase dados: VAZIO');
     }
+    // ALWAYS re-render when Firebase data arrives to show correct values
+    if (window.selectedTurma && typeof window.renderAlunoList === 'function') {
+      window.renderAlunoList();
+    }
     if (!window._fbReady) {
       window._fbReady = true;
       // Flush queue
@@ -896,8 +900,6 @@ body {
         window._saveQueue.forEach(item => set(ref(db, item.path), item.data));
         window._saveQueue = [];
       }
-      // Re-render
-      if (window.selectedTurma) window.renderAlunoList();
     }
   });
 
@@ -1495,9 +1497,8 @@ function saveDado(turmaId, alunoId) {
 }
 
 function loadAll() {
-  // Firebase listener handles data loading
-  document.getElementById('alunosContainer').innerHTML =
-    '<div class="empty-state"><div class="icon">🔄</div><p>Conectando...</p></div>';
+  // Firebase listener will re-render when data arrives
+  // Don't show loading screen - just wait for Firebase
 }
 
 function loadAdmin() { /* handled by Firebase listener */ }
