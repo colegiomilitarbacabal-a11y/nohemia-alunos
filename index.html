@@ -854,140 +854,95 @@ body {
     projectId: "nohemia-alunos",
     storageBucket: "nohemia-alunos.firebasestorage.app",
     messagingSenderId: "243043498278",
-    appId: "1:243043498278:web:0bf6bbdfb61fc0d1e6e9e7",
-    measurementId: "G-V6TL3JTCWR"
+    appId: "1:243043498278:web:0bf6bbdfb61fc0d1e6e9e7"
   };
 
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
-  // ===== FIREBASE HELPERS =====
-  window.fbSave = async function(path, data) {
+  // ===== SAVE: escreve um aluno no Firebase =====
+  window.fbSaveDado = async function(path, data) {
     try {
       await set(ref(db, path), data);
-      // Also save to localStorage as backup
-      try { localStorage.setItem('fb_' + path.replace(/\//g,'_'), JSON.stringify(data)); } catch(e) {}
     } catch(e) {
-      console.warn('Firebase offline, queuing:', path);
-      // Save to localStorage for offline use
-      try { localStorage.setItem('fb_' + path.replace(/\//g,'_'), JSON.stringify(data)); } catch(ex) {}
-      // Queue for when back online
-      if (!window._offlineQueue) window._offlineQueue = [];
-      window._offlineQueue.push({path, data});
+      console.warn('Firebase save error, queuing:', e);
+      if (!window._saveQueue) window._saveQueue = [];
+      window._saveQueue.push({path, data});
     }
   };
 
-  window.fbUpdate = async function(path, data) {
-    try {
-      await update(ref(db, path), data);
-    } catch(e) { console.error('Firebase update error:', e); }
-  };
+  window.fbSave = window.fbSaveDado;
 
-  window.fbGet = async function(path) {
-    try {
-      const snap = await get(ref(db, path));
-      return snap.exists() ? snap.val() : null;
-    } catch(e) { console.error('Firebase get error:', e); return null; }
-  };
-
-  window.fbListen = function(path, callback) {
-    // Try localStorage fallback first for instant load
-    try {
-      const cached = localStorage.getItem('fb_' + path.replace(/\//g,'_'));
-      if (cached) callback(JSON.parse(cached));
-    } catch(e) {}
-    // Then listen to Firebase for real-time updates
-    onValue(ref(db, path), (snap) => {
-      const val = snap.exists() ? snap.val() : null;
-      if (val) {
-        try { localStorage.setItem('fb_' + path.replace(/\//g,'_'), JSON.stringify(val)); } catch(e) {}
+  // ===== LISTEN: escuta mudanças em tempo real =====
+  // Escuta dados/ — quando Firebase retorna, SUBSTITUI alunoData
+  onValue(ref(db, 'dados'), (snap) => {
+    if (snap.exists()) {
+      const val = snap.val();
+      // Merge: preserve fotos locais
+      for (const k in val) {
+        const localFoto = window.alunoData[k] ? window.alunoData[k].foto : null;
+        window.alunoData[k] = val[k];
+        if (localFoto) window.alunoData[k].foto = localFoto;
       }
-      callback(val);
-    });
-  };
-
-  // ===== LOAD ALL DATA FROM FIREBASE ON START =====
-  // Listen to fotos separately
-  window.fbListen('fotos', (val) => {
-    if (!val) return;
-    for (const k in val) {
-      if (!window.alunoData[k]) window.alunoData[k] = { faltas: {}, avaliacao: { disciplina:'padrao', ordemUnida:'padrao', apresentacao:'padrao', habilFisica:'padrao', habilPortugues:'padrao', habilMatematica:'padrao', familiar:'receptivo' }, responsavel:{nome:'',telefone:''}, obs:'' };
-      window.alunoData[k].foto = val[k].foto;
-      // Update foto element if visible
-      const parts = k.split('_');
-      // key format: TURMAID_ALUNOID (turmaId may contain underscores, alunoId is last)
-      const lastUnderscore = k.lastIndexOf('_');
-      const tid = k.substring(0, lastUnderscore);
-      const aid = k.substring(lastUnderscore + 1);
-      const fotoEl = document.getElementById('foto-' + tid + '-' + aid);
-      if (fotoEl && val[k].foto) fotoEl.innerHTML = '<img src="' + val[k].foto + '" alt="">';
+    }
+    if (!window._fbReady) {
+      window._fbReady = true;
+      // Flush queue
+      if (window._saveQueue && window._saveQueue.length > 0) {
+        window._saveQueue.forEach(item => set(ref(db, item.path), item.data));
+        window._saveQueue = [];
+      }
+      // Re-render
+      if (window.selectedTurma) window.renderAlunoList();
     }
   });
 
-  // Monitor connection state
-  import { ref as dbRef } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-  const connectedRef = dbRef(db, '.info/connected');
-  onValue(connectedRef, (snap) => {
+  // Escuta fotos
+  onValue(ref(db, 'fotos'), (snap) => {
+    if (!snap.exists()) return;
+    const val = snap.val();
+    for (const k in val) {
+      if (!window.alunoData[k]) window.alunoData[k] = window._getDefaultData();
+      window.alunoData[k].foto = val[k].foto;
+      const lastU = k.lastIndexOf('_');
+      const tid = k.substring(0, lastU);
+      const aid = k.substring(lastU + 1);
+      const el = document.getElementById('foto-' + tid + '-' + aid);
+      if (el && val[k].foto) el.innerHTML = '<img src="' + val[k].foto + '" alt="">';
+    }
+  });
+
+  // Escuta admin
+  onValue(ref(db, 'admin'), (snap) => {
+    if (!snap.exists()) return;
+    const a = snap.val();
+    if (a.cmdColegio) document.getElementById('cmd-colegio').value = a.cmdColegio;
+    if (a.subcmd) document.getElementById('subcmd-colegio').value = a.subcmd;
+    if (a.chefAdm) document.getElementById('chef-adm').value = a.chefAdm;
+    if (a.cmdCorpo) document.getElementById('cmd-corpo').value = a.cmdCorpo;
+    if (a.mon) a.mon.forEach((v,i) => { const el = document.getElementById('mon'+(i+1)); if(el && v) el.value = v; });
+  });
+
+  // Monitor conexão
+  onValue(ref(db, '.info/connected'), (snap) => {
     const online = snap.val() === true;
     const el = document.getElementById('onlineStatus');
     if (el) {
       el.style.display = 'block';
       el.style.background = online ? '#27ae60' : '#c0392b';
       el.textContent = online ? '🟢 Online' : '🔴 Offline';
+      if (!online) setTimeout(() => { if(el) el.style.display='none'; }, 3000);
     }
-    // If back online, flush pending queue
-    if (online && window._offlineQueue && window._offlineQueue.length > 0) {
-      window._offlineQueue.forEach(item => window.fbSave(item.path, item.data));
-      window._offlineQueue = [];
-    }
-  });
-
-  window.fbListen('dados', (val) => {
-    if (val) {
-      // Merge Firebase data into alunoData carefully
-      for (const k in val) {
-        const fbEntry = val[k];
-        // Preserve foto from local if not in Firebase
-        const localFoto = (window.alunoData[k] && window.alunoData[k].foto) ? window.alunoData[k].foto : null;
-        window.alunoData[k] = fbEntry;
-        window.alunoData[k].foto = localFoto;
-        // Also update localStorage cache
-        try { localStorage.setItem('fb_dados_' + k, JSON.stringify(fbEntry)); } catch(e) {}
-        // Restore avaliacao from localStorage if user has set custom values
-        try {
-          const savedAv = localStorage.getItem('av_' + k);
-          if (savedAv) {
-            const av = JSON.parse(savedAv);
-            const campos = ['disciplina','ordemUnida','apresentacao','habilFisica','habilPortugues','habilMatematica'];
-            const hasCustom = campos.some(c => av[c] && av[c] !== 'padrao');
-            if (hasCustom) {
-              window.alunoData[k].avaliacao = Object.assign({}, window.alunoData[k].avaliacao, av);
-            }
-          }
-        } catch(e) {}
-      }
-    }
-    if (!window._fbInitialized) {
-      window._fbInitialized = true;
-      // Flush any queued saves
-      if (window._saveQueue && window._saveQueue.length > 0) {
-        window._saveQueue.forEach(item => window.fbSave(item.path, item.data));
-        window._saveQueue = [];
-      }
-      // Re-render current turma if selected
-      if (window.selectedTurma) window.renderAlunoList();
+    if (online && window._saveQueue && window._saveQueue.length > 0) {
+      window._saveQueue.forEach(item => set(ref(db, item.path), item.data));
+      window._saveQueue = [];
     }
   });
 
-  window.fbListen('admin', (val) => {
-    if (val) {
-      if (val.cmdColegio) document.getElementById('cmd-colegio').value = val.cmdColegio;
-      if (val.subcmd) document.getElementById('subcmd-colegio').value = val.subcmd;
-      if (val.chefAdm) document.getElementById('chef-adm').value = val.chefAdm;
-      if (val.cmdCorpo) document.getElementById('cmd-corpo').value = val.cmdCorpo;
-      if (val.mon) val.mon.forEach((v,i) => { const el = document.getElementById('mon'+(i+1)); if(el && v) el.value = v; });
-    }
-  });
+  // Expoe fbListen para compatibilidade
+  window.fbListen = function(path, cb) {
+    onValue(ref(db, path), snap => cb(snap.exists() ? snap.val() : null));
+  };
 </script>
 </head>
 <body>
@@ -1458,10 +1413,42 @@ const LS_KEY = 'nohemia_data_2026';
 const LS_ADMIN = 'nohemia_admin_2026';
 
 // ==================== LOCALSTORAGE ====================
-function saveAll() {
-  // No-op: individual saves handle Firebase sync
+function saveAll() { showToast(); }
+
+function saveDado(turmaId, alunoId) {
+  const k = getKey(turmaId, alunoId);
+  const d = alunoData[k];
+  if (!d) return;
+
+  const toSave = {
+    faltas: d.faltas || {},
+    avaliacao: {
+      disciplina:      d.avaliacao.disciplina      || 'nao_atribuido',
+      ordemUnida:      d.avaliacao.ordemUnida      || 'nao_atribuido',
+      apresentacao:    d.avaliacao.apresentacao    || 'nao_atribuido',
+      habilFisica:     d.avaliacao.habilFisica     || 'nao_atribuido',
+      habilPortugues:  d.avaliacao.habilPortugues  || 'nao_atribuido',
+      habilMatematica: d.avaliacao.habilMatematica || 'nao_atribuido',
+      familiar:        d.avaliacao.familiar        || 'receptivo'
+    },
+    responsavel: d.responsavel || { nome:'', telefone:'' },
+    obs: d.obs || ''
+  };
+
+  // Atualiza memória
+  alunoData[k].avaliacao = toSave.avaliacao;
+
+  // Salva no Firebase
+  if (typeof window.fbSaveDado === 'function') {
+    window.fbSaveDado('dados/' + k, toSave);
+  } else {
+    if (!window._saveQueue) window._saveQueue = [];
+    window._saveQueue.push({ path: 'dados/' + k, data: toSave });
+  }
   showToast();
 }
+
+function saveAll() { showToast(); }
 
 function saveDado(turmaId, alunoId) {
   const k = getKey(turmaId, alunoId);
@@ -1503,57 +1490,12 @@ function saveDado(turmaId, alunoId) {
 }
 
 function loadAll() {
-  // Load from localStorage immediately for fast display
-  try {
-    for (const key of Object.keys(localStorage)) {
-      if (key.startsWith('fb_dados_')) {
-        const k = key.replace('fb_dados_', '');
-        const val = JSON.parse(localStorage.getItem(key));
-        if (val) {
-          alunoData[k] = val;
-          alunoData[k].foto = null;
-          // Ensure avaliacao defaults to nao_atribuido not padrao
-          if (alunoData[k].avaliacao) {
-            const av = alunoData[k].avaliacao;
-            const campos = ['disciplina','ordemUnida','apresentacao','habilFisica','habilPortugues','habilMatematica'];
-            campos.forEach(c => {
-              if (!av[c]) av[c] = 'nao_atribuido';
-            });
-          }
-        }
-      }
-      if (key.startsWith('nohemia_foto_')) {
-        const k = key.replace('nohemia_foto_', '');
-        if (!alunoData[k]) alunoData[k] = getDefaultData();
-        alunoData[k].foto = localStorage.getItem(key);
-      }
-    }
-  } catch(e) {}
-  // Show connecting state only if no local data
-  if (Object.keys(alunoData).length === 0) {
-    document.getElementById('alunosContainer').innerHTML =
-      '<div class="empty-state"><div class="icon">🔄</div><p>Conectando ao servidor...</p></div>';
-  }
+  // Firebase listener handles data loading
+  document.getElementById('alunosContainer').innerHTML =
+    '<div class="empty-state"><div class="icon">🔄</div><p>Conectando...</p></div>';
 }
 
-function saveAdmin() {
-  const admin = {
-    cmdColegio: document.getElementById('cmd-colegio').value,
-    subcmd: document.getElementById('subcmd-colegio').value,
-    chefAdm: document.getElementById('chef-adm').value,
-    cmdCorpo: document.getElementById('cmd-corpo').value,
-    mon: [1,2,3,4,5,6].map(i => document.getElementById('mon'+i).value)
-  };
-  try { localStorage.setItem('fb_admin', JSON.stringify(admin)); } catch(e) {}
-  if (typeof window.fbSave === 'function') {
-    window.fbSave('admin', admin);
-  }
-  showToast();
-}
-
-function loadAdmin() {
-  // Loaded via Firebase listener
-}
+function loadAdmin() { /* handled by Firebase listener */ }
 
 let toastTimer;
 function showToast() {
@@ -1603,7 +1545,7 @@ function atualizarNivelCard(turmaId, alunoId) {
 // ==================== HELPERS ====================
 function getKey(turmaId, alunoId) { return `${turmaId}_${alunoId}`; }
 
-function getDefaultData() {
+window._getDefaultData = window._getDefaultData = function getDefaultData() {
   return {
     faltas: {},
     avaliacao: { disciplina: 'nao_atribuido', ordemUnida: 'nao_atribuido', apresentacao: 'nao_atribuido', habilFisica: 'nao_atribuido', habilPortugues: 'nao_atribuido', habilMatematica: 'nao_atribuido', familiar: 'receptivo' },
