@@ -1485,9 +1485,6 @@ function saveDado(turmaId, alunoId) {
   // Update in-memory too
   alunoData[k].avaliacao = avaliacao;
 
-  // Save avaliacao separately to localStorage for persistence
-  try { localStorage.setItem('av_' + k, JSON.stringify(avaliacao)); } catch(e) {}
-
   // Save to Firebase if available
   if (typeof window.fbSave === 'function') {
     window.fbSave('dados/' + k, toSave);
@@ -1566,17 +1563,6 @@ window._getDefaultData = window._getDefaultData = function getDefaultData() {
 function getData(turmaId, alunoId) {
   const k = getKey(turmaId, alunoId);
   if (!alunoData[k]) alunoData[k] = getDefaultData();
-  // Restore avaliacao from localStorage if it has user-set values
-  try {
-    const savedAv = localStorage.getItem('av_' + k);
-    if (savedAv) {
-      const av = JSON.parse(savedAv);
-      // Only restore if it has non-default values
-      const campos = ['disciplina','ordemUnida','apresentacao','habilFisica','habilPortugues','habilMatematica'];
-      const hasCustom = campos.some(c => av[c] && av[c] !== 'padrao');
-      if (hasCustom) alunoData[k].avaliacao = Object.assign({}, alunoData[k].avaliacao, av);
-    }
-  } catch(e) {}
   return alunoData[k];
 }
 
@@ -1640,8 +1626,9 @@ function selectTurma(id) {
 
 // ==================== RENDER ALUNOS ====================
 function renderAlunoList() {
+  // Always sync from global Firebase data
   alunoData = window.alunoData;
-  selectedTurma = window.selectedTurma;
+  selectedTurma = window.selectedTurma || selectedTurma;
   if (!selectedTurma) return;
   const turma = turmas.find(t => t.id === selectedTurma);
   const month = parseInt(document.getElementById('monthSelect').value);
@@ -1967,11 +1954,7 @@ function updateAvaliacao(turmaId, alunoId, field, sel) {
   sel.className = 'status-select ' + sel.value;
   atualizarNivelCard(turmaId, alunoId);
   saveDado(turmaId, alunoId);
-  // Extra: save to localStorage immediately with turma+aluno key
-  try {
-    const k = getKey(turmaId, alunoId);
-    localStorage.setItem('av_' + k, JSON.stringify(data.avaliacao));
-  } catch(e) {}
+
 }
 
 function updateFamiliar(turmaId, alunoId, sel) {
