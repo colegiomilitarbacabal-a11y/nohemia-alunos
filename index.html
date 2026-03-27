@@ -2218,8 +2218,16 @@ renderTurmaButtons();
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('sw.js')
-      .then(reg => console.log('SW registrado:', reg.scope))
+      .then(reg => {
+        console.log('SW registrado:', reg.scope);
+        // Force update
+        reg.update();
+      })
       .catch(err => console.log('SW erro:', err));
+    // Unregister old SW and reload if needed
+    navigator.serviceWorker.ready.then(reg => {
+      reg.update();
+    });
   });
 }
 </script>
