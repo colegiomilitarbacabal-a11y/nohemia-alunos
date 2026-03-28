@@ -1517,7 +1517,7 @@ function atualizarNivelCard(turmaId, alunoId) {
 // ==================== HELPERS ====================
 function getKey(turmaId, alunoId) { return `${turmaId}_${alunoId}`; }
 
-window._getDefaultData = window._getDefaultData = function getDefaultData() {
+function getDefaultData() {
   return {
     faltas: {},
     avaliacao: { disciplina: 'nao_atribuido', ordemUnida: 'nao_atribuido', apresentacao: 'nao_atribuido', habilFisica: 'nao_atribuido', habilPortugues: 'nao_atribuido', habilMatematica: 'nao_atribuido', familiar: 'receptivo' },
@@ -1555,7 +1555,8 @@ function getWorkdays(year, month) {
 
 function getFaltaCount(turmaId, alunoId, year, month) {
   const data = getData(turmaId, alunoId);
-  return Object.keys(data.faltas).filter(k => k.startsWith(`${year}-${month}-`)).length;
+  if (!data || !data.faltas) return 0;
+  return Object.keys(data.faltas).filter(k => k.startsWith(year+'-'+month+'-')).length;
 }
 
 // ==================== UI HELPERS ====================
