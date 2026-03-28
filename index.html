@@ -869,6 +869,7 @@ body {
   window.fbSave = window.fbSaveDado;
 
   // Carrega TODOS os dados uma única vez ao iniciar
+  // Load data ONCE at startup
   onValue(ref(db, 'dados'), (snap) => {
     if (snap.exists()) {
       const val = snap.val();
@@ -879,20 +880,15 @@ body {
       }
       alunoData = window.alunoData;
     }
-    // Re-renderiza apenas se tiver turma selecionada
-    // Small delay to avoid race condition with selectTurma
+    // Only render if page is empty
     if (window.selectedTurma && typeof window.renderAlunoList === 'function') {
-      // Only re-render if current view is empty or stale
-const container = document.getElementById('alunosContainer');
-const hasCards = container && container.querySelector('.aluno-card');
-if (!hasCards) {
-  setTimeout(() => window.renderAlunoList(), 100);
-} else {
-  // Just update the select values without full re-render
-  alunoData = window.alunoData;
-}
+      const container = document.getElementById('alunosContainer');
+      const hasCards = container && container.querySelector('.aluno-card');
+      if (!hasCards) {
+        setTimeout(() => window.renderAlunoList(), 100);
+      }
     }
-  }, { onlyOnce: false });
+  }, { onlyOnce: true });
 
   // Admin
   onValue(ref(db, 'admin'), (snap) => {
