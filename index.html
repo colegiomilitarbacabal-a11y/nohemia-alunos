@@ -879,9 +879,10 @@ body {
       }
       alunoData = window.alunoData;
     }
-    // Re-renderiza se tiver turma selecionada
-    if (window.selectedTurma) {
-      window.renderAlunoList();
+    // Re-renderiza apenas se tiver turma selecionada
+    // Small delay to avoid race condition with selectTurma
+    if (window.selectedTurma && typeof window.renderAlunoList === 'function') {
+      setTimeout(() => window.renderAlunoList(), 50);
     }
   }, { onlyOnce: false });
 
@@ -1529,8 +1530,10 @@ function getDefaultData() {
 
 function getData(turmaId, alunoId) {
   const k = getKey(turmaId, alunoId);
-  if (!alunoData[k]) alunoData[k] = getDefaultData();
-  return alunoData[k];
+  // Always use window.alunoData as source of truth
+  if (!window.alunoData[k]) window.alunoData[k] = getDefaultData();
+  alunoData = window.alunoData;
+  return window.alunoData[k];
 }
 
 function calcIdade(nascStr) {
@@ -1598,6 +1601,7 @@ window.renderAlunoList = function renderAlunoList() {
   alunoData = window.alunoData;
   selectedTurma = window.selectedTurma || selectedTurma;
   if (!selectedTurma) return;
+  if (!turmas || turmas.length === 0) return;
   const turma = turmas.find(t => t.id === selectedTurma);
   const month = parseInt(document.getElementById('monthSelect').value);
   const year = 2026;
