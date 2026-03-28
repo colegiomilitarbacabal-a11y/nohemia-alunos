@@ -882,7 +882,15 @@ body {
     // Re-renderiza apenas se tiver turma selecionada
     // Small delay to avoid race condition with selectTurma
     if (window.selectedTurma && typeof window.renderAlunoList === 'function') {
-      setTimeout(() => window.renderAlunoList(), 50);
+      // Only re-render if current view is empty or stale
+const container = document.getElementById('alunosContainer');
+const hasCards = container && container.querySelector('.aluno-card');
+if (!hasCards) {
+  setTimeout(() => window.renderAlunoList(), 100);
+} else {
+  // Just update the select values without full re-render
+  alunoData = window.alunoData;
+}
     }
   }, { onlyOnce: false });
 
@@ -1399,7 +1407,7 @@ function saveDado(turmaId, alunoId) {
   if (!d) return;
 
   const toSave = {
-    faltas: d.faltas || {},
+    faltas: (d.faltas && typeof d.faltas === 'object') ? d.faltas : {},
     avaliacao: {
       disciplina:      d.avaliacao.disciplina      || 'nao_atribuido',
       ordemUnida:      d.avaliacao.ordemUnida      || 'nao_atribuido',
@@ -1443,7 +1451,7 @@ function saveDado(turmaId, alunoId) {
   );
 
   const toSave = {
-    faltas: d.faltas || {},
+    faltas: (d.faltas && typeof d.faltas === 'object') ? d.faltas : {},
     avaliacao: avaliacao,
     responsavel: d.responsavel || { nome:'', telefone:'' },
     obs: d.obs || ''
@@ -1733,7 +1741,7 @@ window.renderAlunoList = function renderAlunoList() {
               data-tid="${turma.id}" data-aid="${aluno.id}" data-year="${year}" data-month="${month}">
               ${workdays.map(d => {
                 const k = year+'-'+month+'-'+d;
-                const isFalta = !!data.faltas[k];
+                const isFalta = !!(data.faltas && data.faltas[k]);
                 const cls = isFalta ? 'falta-dia-btn active' : 'falta-dia-btn';
                 return '<button class="' + cls + '" data-day="' + d + '">' + d + '</button>';
               }).join('')}
@@ -1749,34 +1757,32 @@ window.renderAlunoList = function renderAlunoList() {
 
   container.appendChild(list);
 
-  // Re-attach event delegation every render (container was replaced)
-  container.addEventListener('click', function(e) {
-    const btn = e.target.closest('.falta-dia-btn');
-    if (!btn) return;
-    const grid = btn.closest('.faltas-dias-grid');
-    if (!grid) return;
-    const tid = grid.dataset.tid;
-    const aid = parseInt(grid.dataset.aid);
-    const year = parseInt(grid.dataset.year);
-    const month = parseInt(grid.dataset.month);
-    const day = parseInt(btn.dataset.day);
 
-    const data = getData(tid, aid);
-    const k = year + '-' + month + '-' + day;
-    if (data.faltas[k]) delete data.faltas[k];
-    else data.faltas[k] = true;
-
-    // Visual feedback immediately
-    btn.className = data.faltas[k] ? 'falta-dia-btn active' : 'falta-dia-btn';
-
-    // Update header and badge
-    updateAlunoHeader(tid, aid);
-    updateFaltaSummaryBadge(tid, aid, year, month);
-
-    // Save
-    saveDado(tid, aid);
-  });
 }
+
+// Attach event delegation ONCE to main content (permanent element)
+document.addEventListener('click', function(e) {
+  const btn = e.target.closest('.falta-dia-btn');
+  if (!btn) return;
+  const grid = btn.closest('.faltas-dias-grid');
+  if (!grid) return;
+  const tid = grid.dataset.tid;
+  const aid = parseInt(grid.dataset.aid);
+  const year = parseInt(grid.dataset.year);
+  const month = parseInt(grid.dataset.month);
+  const day = parseInt(btn.dataset.day);
+
+  const data = getData(tid, aid);
+  if (!data.faltas) data.faltas = {};
+  const k = year + '-' + month + '-' + day;
+  if (data.faltas[k]) delete data.faltas[k];
+  else data.faltas[k] = true;
+
+  btn.className = data.faltas[k] ? 'falta-dia-btn active' : 'falta-dia-btn';
+  updateAlunoHeader(tid, aid);
+  updateFaltaSummaryBadge(tid, aid, year, month);
+  saveDado(tid, aid);
+});
 
 function renderSelect(turmaId, alunoId, field, label) {
   const data = getData(turmaId, alunoId);
