@@ -1679,7 +1679,7 @@ window.renderAlunoList = function renderAlunoList() {
         </div>
       </div>
 
-      <div class="aluno-body" id="body-${turma.id}-${aluno.id}">
+      <div class="aluno-body" id="body-${turma.id}-${aluno.id}" onclick="event.stopPropagation()">
         <div class="aluno-body-grid">
 
           <div>
@@ -1761,16 +1761,22 @@ window.renderAlunoList = function renderAlunoList() {
 }
 
 // Attach event delegation ONCE to main content (permanent element)
-document.addEventListener('click', function(e) {
+function handleFaltaClick(e) {
   const btn = e.target.closest('.falta-dia-btn');
   if (!btn) return;
+  e.stopPropagation();
+  e.preventDefault();
+  
   const grid = btn.closest('.faltas-dias-grid');
   if (!grid) return;
+  
   const tid = grid.dataset.tid;
   const aid = parseInt(grid.dataset.aid);
   const year = parseInt(grid.dataset.year);
   const month = parseInt(grid.dataset.month);
   const day = parseInt(btn.dataset.day);
+  
+  if (!tid || isNaN(aid) || isNaN(day)) return;
 
   const data = getData(tid, aid);
   if (!data.faltas) data.faltas = {};
@@ -1782,6 +1788,14 @@ document.addEventListener('click', function(e) {
   updateAlunoHeader(tid, aid);
   updateFaltaSummaryBadge(tid, aid, year, month);
   saveDado(tid, aid);
+}
+
+document.addEventListener('click', handleFaltaClick);
+document.addEventListener('touchend', function(e) {
+  if (e.target.closest('.falta-dia-btn')) {
+    e.preventDefault();
+    handleFaltaClick(e);
+  }
 });
 
 function renderSelect(turmaId, alunoId, field, label) {
