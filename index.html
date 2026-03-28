@@ -1770,8 +1770,7 @@ window.renderAlunoList = function renderAlunoList() {
 
     // Save
     saveDado(tid, aid);
-  })};
-
+  });
 }
 
 function renderSelect(turmaId, alunoId, field, label) {
@@ -2172,6 +2171,7 @@ window.addEventListener('offline', () => { const el = document.getElementById('o
 loadAll();
 loadAdmin();
 renderTurmaButtons();
+window.renderAlunoList = renderAlunoList;
 </script>
 
 <script>
