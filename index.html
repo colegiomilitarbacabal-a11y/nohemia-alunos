@@ -841,6 +841,157 @@ body {
   outline: none;
   border-color: var(--olive);
 }
+
+/* ===== MÓDULO PUNIÇÕES DISCIPLINARES ===== */
+.btn-punicao {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: linear-gradient(135deg, #8b1a1a, #c0392b);
+  color: white; border: none; border-radius: 8px;
+  padding: 8px 14px; font-family: 'Oswald', sans-serif;
+  font-size: 0.75rem; letter-spacing: 0.5px; cursor: pointer;
+  transition: opacity 0.2s; min-height: 44px; margin-top: 12px;
+  width: 100%; justify-content: center;
+}
+.btn-punicao:active { opacity: 0.7; transform: scale(0.96); }
+.punicao-count-badge {
+  display: inline-block; background: rgba(255,255,255,0.3);
+  color: white; border-radius: 50%; width: 20px; height: 20px;
+  font-size: 0.65rem; line-height: 20px; text-align: center;
+  font-weight: 700; margin-left: 4px;
+}
+.pun-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.75);
+  z-index: 1000; display: none; align-items: flex-start;
+  justify-content: center; overflow-y: auto;
+}
+.pun-overlay.open { display: flex; }
+.pun-modal {
+  background: #fffef8; width: 100%; max-width: 680px;
+  border-radius: 0; box-shadow: 0 0 40px rgba(0,0,0,0.5);
+  display: flex; flex-direction: column; min-height: 100vh;
+}
+@media(min-width:700px){ .pun-modal { border-radius: 14px; margin: 20px auto; min-height: auto; } }
+.pun-header {
+  background: linear-gradient(135deg, #1a2010, #2d3a1e);
+  color: #e8c96a; padding: 14px 16px; display: flex;
+  align-items: center; gap: 12px; position: sticky; top: 0; z-index: 10;
+}
+@media(min-width:700px){ .pun-header { border-radius: 14px 14px 0 0; } }
+.pun-header h2 {
+  font-family: 'Oswald', sans-serif; font-size: 1rem;
+  letter-spacing: 1.5px; text-transform: uppercase; flex: 1; margin: 0;
+}
+.pun-close-btn {
+  background: rgba(255,255,255,0.15); border: 1px solid rgba(232,201,106,0.4);
+  color: #e8c96a; border-radius: 8px; padding: 6px 12px;
+  font-family: 'Oswald', sans-serif; font-size: 0.8rem; cursor: pointer;
+}
+.pun-body { padding: 16px; flex: 1; }
+.pun-tabs { display: flex; border-bottom: 2px solid #c5bb8e; margin-bottom: 16px; }
+.pun-tab {
+  flex: 1; padding: 10px; text-align: center; font-family: 'Oswald', sans-serif;
+  font-size: 0.78rem; letter-spacing: 0.5px; cursor: pointer; border: none;
+  background: none; color: #666; transition: all 0.2s;
+  border-bottom: 3px solid transparent; margin-bottom: -2px;
+}
+.pun-tab.active { color: #2d3a1e; border-bottom-color: #c9a84c; font-weight: 700; }
+.pun-section {
+  background: white; border: 1px solid #c5bb8e; border-radius: 8px;
+  padding: 12px; margin-bottom: 12px;
+}
+.pun-section-title {
+  font-family: 'Oswald', sans-serif; font-size: 0.72rem;
+  letter-spacing: 1.5px; text-transform: uppercase; color: #2d3a1e;
+  margin-bottom: 10px; padding-bottom: 4px; border-bottom: 1px solid #b5c17a;
+}
+.pun-field { margin-bottom: 10px; }
+.pun-field label {
+  display: block; font-size: 0.68rem; color: #555;
+  text-transform: uppercase; letter-spacing: 0.3px; font-weight: 600; margin-bottom: 4px;
+}
+.pun-input, .pun-select, .pun-textarea {
+  width: 100%; border: 1px solid #c5bb8e; border-radius: 6px;
+  padding: 10px; font-family: 'Source Sans 3', sans-serif;
+  font-size: 0.95rem; background: #fffef8; min-height: 44px; box-sizing: border-box;
+}
+.pun-input:focus, .pun-select:focus, .pun-textarea:focus { outline: none; border-color: #2d3a1e; }
+.pun-textarea { min-height: 80px; resize: vertical; }
+.transgressao-grid { display: flex; flex-direction: column; gap: 4px; }
+.transgressao-item {
+  display: flex; align-items: flex-start; gap: 8px;
+  padding: 8px 10px; border-radius: 6px; cursor: pointer;
+  transition: background 0.15s; border: 1px solid transparent; user-select: none;
+}
+.transgressao-item:hover { background: #f5f0e0; }
+.transgressao-item.selected { background: #fff0f0; border-color: #e74c3c; }
+.transgressao-item input[type=checkbox] {
+  width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px; accent-color: #c0392b;
+}
+.transgressao-item label {
+  font-size: 0.88rem; cursor: pointer; color: #333;
+  flex: 1; margin: 0; text-transform: none; letter-spacing: 0; font-weight: normal;
+}
+.transgressao-item.selected label { color: #c0392b; font-weight: 600; }
+.sancao-options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.sancao-btn {
+  border: 2px solid #c5bb8e; border-radius: 8px; padding: 10px 8px;
+  text-align: center; cursor: pointer; transition: all 0.2s; background: white;
+}
+.sancao-btn.selected { border-color: #c0392b; background: #fff0f0; }
+.sancao-btn .sancao-icon { font-size: 1.4rem; display: block; margin-bottom: 4px; }
+.sancao-btn .sancao-name {
+  font-family: 'Oswald', sans-serif; font-size: 0.72rem;
+  letter-spacing: 0.5px; text-transform: uppercase; color: #333;
+}
+.sancao-btn.selected .sancao-name { color: #c0392b; font-weight: 700; }
+.natureza-options { display: flex; gap: 8px; }
+.natureza-btn {
+  flex: 1; border: 2px solid #c5bb8e; border-radius: 8px; padding: 10px;
+  text-align: center; cursor: pointer; font-family: 'Oswald', sans-serif;
+  font-size: 0.75rem; letter-spacing: 0.5px; text-transform: uppercase;
+  background: white; transition: all 0.2s;
+}
+.natureza-btn.leve.selected { border-color: #f39c12; background: #fff8e1; color: #e65100; }
+.natureza-btn.media.selected { border-color: #e67e22; background: #fff3e0; color: #bf360c; }
+.natureza-btn.grave.selected { border-color: #c0392b; background: #ffebee; color: #b71c1c; }
+.btn-gerar-pdf {
+  width: 100%; background: linear-gradient(135deg, #1a2010, #2d3a1e);
+  color: #e8c96a; border: none; border-radius: 10px; padding: 14px;
+  font-family: 'Oswald', sans-serif; font-size: 1rem; letter-spacing: 1.5px;
+  text-transform: uppercase; cursor: pointer; margin-top: 8px; transition: opacity 0.2s;
+}
+.btn-gerar-pdf:active { opacity: 0.8; }
+.hist-item {
+  background: white; border: 1px solid #c5bb8e; border-radius: 8px;
+  padding: 12px; margin-bottom: 8px; border-left: 4px solid #c0392b;
+}
+.hist-item-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+.hist-item-date { font-size: 0.72rem; color: #888; }
+.hist-item-sancao {
+  font-family: 'Oswald', sans-serif; font-size: 0.72rem; letter-spacing: 0.5px;
+  padding: 3px 8px; border-radius: 10px; background: #fff0f0; color: #c0392b;
+}
+.hist-item-sancao.advertencia { background: #e3f2fd; color: #1565c0; }
+.hist-item-sancao.suspensao { background: #fff3e0; color: #e65100; }
+.hist-item-sancao.conselho_disciplina { background: #ffebee; color: #b71c1c; }
+.hist-item-aluno { font-weight: 700; font-size: 0.92rem; color: #1a2010; }
+.hist-item-tr { font-size: 0.8rem; color: #555; margin-top: 4px; }
+.hist-item-actions { display: flex; gap: 6px; margin-top: 8px; }
+.hist-btn { background: #f5f0e0; border: 1px solid #c5bb8e; border-radius: 6px; padding: 6px 10px; font-size: 0.75rem; cursor: pointer; }
+.hist-btn.del { color: #c0392b; }
+.pdf-toast {
+  position: fixed; bottom: 20px; left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: #2d3a1e; color: #e8c96a; padding: 12px 24px; border-radius: 24px;
+  font-family: 'Oswald', sans-serif; font-size: 0.9rem; letter-spacing: 1px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4); z-index: 9999;
+  transition: transform 0.3s ease; pointer-events: none;
+}
+.pdf-toast.show { transform: translateX(-50%) translateY(0); }
+.pun-numero-row { display: flex; align-items: center; gap: 8px; }
+.pun-numero-row input { flex: 1; }
+.pun-numero-row span { font-size: 0.72rem; color: #888; white-space: nowrap; }
+
 </style>
 
 <script type="module">
@@ -925,6 +1076,7 @@ body {
     }
   });
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
 
@@ -1720,6 +1872,19 @@ window.renderAlunoList = function renderAlunoList() {
               <textarea class="obs-textarea" placeholder="Observações sobre o aluno..."
                 onchange="updateObs('${turma.id}', ${aluno.id}, this.value)">${data.obs}</textarea>
             </div>
+
+            <div style="margin-top:14px;">
+              <div class="section-label">⚖️ Punições Disciplinares</div>
+              <button class="btn-punicao"
+                data-tid="${turma.id}"
+                data-aid="${aluno.id}"
+                data-nome="${aluno.nome.replace(/"/g,'&quot;')}"
+                data-turma="${turma.nome.replace(/"/g,'&quot;')}"
+                onclick="event.stopPropagation(); var b=this; abrirPunicaoModal(b.dataset.tid, parseInt(b.dataset.aid), b.dataset.nome, b.dataset.turma)">
+                ⚖️ REGISTRAR NOTA DE PUNIÇÃO
+                <span class="punicao-count-badge" id="pun-badge-${turma.id}-${aluno.id}" style="display:none">0</span>
+              </button>
+            </div>
           </div>
 
           <div>
@@ -1762,6 +1927,8 @@ window.renderAlunoList = function renderAlunoList() {
   });
 
   container.appendChild(list);
+  // Update punição badges
+  turma.alunos.forEach(a => { if(typeof updatePunBadge === "function") updatePunBadge(turma.id, a.id); });
 
 
 }
@@ -2292,5 +2459,468 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') {
   });
 }
 </script>
+
+<!-- ==================== MÓDULO PUNIÇÕES DISCIPLINARES ==================== -->
+<div id="punModal" class="pun-overlay">
+  <div class="pun-modal">
+    <div class="pun-header">
+      <span>⚖️</span>
+      <h2 id="punModalTitle">Nota de Punição Disciplinar</h2>
+      <button class="pun-close-btn" onclick="fecharPunModal()">✕ Fechar</button>
+    </div>
+    <div class="pun-body">
+      <div class="pun-tabs">
+        <button class="pun-tab active" onclick="punTab('nova',this)">📝 Nova Nota</button>
+        <button class="pun-tab" onclick="punTab('historico',this)">📋 Histórico <span id="punHistCount" class="punicao-count-badge" style="display:none;background:#c0392b;">0</span></button>
+      </div>
+
+      <div id="punTabNova">
+        <div class="pun-section">
+          <div class="pun-section-title">📋 Identificação do Documento</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <div class="pun-field">
+              <label>Nº da Nota</label>
+              <div class="pun-numero-row">
+                <input class="pun-input" id="punNumero" type="text" placeholder="001/2026" readonly>
+                <span>auto</span>
+              </div>
+            </div>
+            <div class="pun-field">
+              <label>Data</label>
+              <input class="pun-input" id="punData" type="date">
+            </div>
+          </div>
+          <div class="pun-field"><label>Aluno(a)</label><input class="pun-input" id="punAlunoNome" type="text" readonly></div>
+          <div class="pun-field"><label>Turma</label><input class="pun-input" id="punTurma" type="text" readonly></div>
+        </div>
+
+        <div class="pun-section">
+          <div class="pun-section-title">👮 Monitor Comunicante do Fato</div>
+          <div class="pun-field">
+            <label>Selecione o Monitor</label>
+            <select class="pun-select" id="punMonitorSelect" onchange="punMonitorChange(this)">
+              <option value="">— Selecionar —</option>
+              <option value="Débora Marques do Nascimento Pereira">Débora Marques do Nascimento Pereira</option>
+              <option value="Paulo Daniel Alves">Paulo Daniel Alves</option>
+              <option value="Cynthia Rakel Carvalho Araújo">Cynthia Rakel Carvalho Araújo</option>
+              <option value="SD Luís Gustavo Lima Mendes">SD Luís Gustavo Lima Mendes</option>
+              <option value="Paulo Rogério Oliveira Mendes">Paulo Rogério Oliveira Mendes</option>
+              <option value="Marco Antonio do Nascimento Rodrigues">Marco Antonio do Nascimento Rodrigues</option>
+              <option value="Larissa de Jesus Vieira">Larissa de Jesus Vieira</option>
+              <option value="outro">✏️ Outro (digitar)</option>
+            </select>
+          </div>
+          <div class="pun-field" id="punMonitorOutroDiv" style="display:none">
+            <label>Nome do Monitor (Outro)</label>
+            <input class="pun-input" id="punMonitorOutro" type="text" placeholder="Nome completo e posto/função">
+          </div>
+        </div>
+
+        <div class="pun-section">
+          <div class="pun-section-title">🚫 Transgressões — Selecione uma ou mais</div>
+          <div class="transgressao-grid" id="transgressaoGrid"></div>
+          <div id="punOutroDiv" style="display:none;margin-top:8px;">
+            <div class="pun-field" style="margin:0">
+              <label>Descrição (Outro)</label>
+              <input class="pun-input" id="punOutroTexto" type="text" placeholder="Descreva a transgressão...">
+            </div>
+          </div>
+        </div>
+
+        <div class="pun-section">
+          <div class="pun-section-title">📄 Descrição Detalhada do Fato</div>
+          <div class="pun-field">
+            <label>Descreva o ocorrido com detalhes (horários, local, etc.)</label>
+            <textarea class="pun-textarea" id="punDescricao"
+              placeholder="Ex.: O aluno chegou às 07h22min. O horário de entrada é até as 07h00min..."></textarea>
+          </div>
+        </div>
+
+        <div class="pun-section">
+          <div class="pun-section-title">⚖️ Tipo de Sanção</div>
+          <div class="sancao-options">
+            <div class="sancao-btn selected" data-sancao="advertencia" onclick="selectSancao(this)">
+              <span class="sancao-icon">📢</span><div class="sancao-name">Advertência</div>
+            </div>
+            <div class="sancao-btn" data-sancao="estudo_obrigatorio" onclick="selectSancao(this)">
+              <span class="sancao-icon">📚</span><div class="sancao-name">Estudo Obrigatório</div>
+            </div>
+            <div class="sancao-btn" data-sancao="suspensao" onclick="selectSancao(this)">
+              <span class="sancao-icon">🚷</span><div class="sancao-name">Suspensão</div>
+            </div>
+            <div class="sancao-btn" data-sancao="conselho_disciplina" onclick="selectSancao(this)">
+              <span class="sancao-icon">🏛️</span><div class="sancao-name">Conselho de Disciplina</div>
+            </div>
+          </div>
+          <div class="pun-field" style="margin-top:10px;">
+            <label>Detalhes da sanção (opcional)</label>
+            <input class="pun-input" id="punDetalhesSancao" type="text"
+              placeholder="Ex.: por 02 dias nos dias 23 e 24/04/2026, das 13h40 às 15h40">
+          </div>
+        </div>
+
+        <div class="pun-section">
+          <div class="pun-section-title">🎯 Natureza da Infração</div>
+          <div class="natureza-options">
+            <button class="natureza-btn leve selected" data-nat="LEVE" onclick="selectNatureza(this)">🟡 Leve</button>
+            <button class="natureza-btn media" data-nat="MÉDIA" onclick="selectNatureza(this)">🟠 Média</button>
+            <button class="natureza-btn grave" data-nat="GRAVE" onclick="selectNatureza(this)">🔴 Grave</button>
+          </div>
+        </div>
+
+        <div class="pun-section">
+          <div class="pun-section-title">👨‍👩‍👧 Responsável pelo Aluno</div>
+          <div class="pun-field">
+            <label>Nome completo do responsável</label>
+            <input class="pun-input" id="punResponsavelNome" type="text" placeholder="Nome completo">
+          </div>
+        </div>
+
+        <button class="btn-gerar-pdf" onclick="gerarNotaPunicao()">
+          📄 GERAR NOTA DE PUNIÇÃO (PDF)
+        </button>
+        <div style="text-align:center;font-size:0.75rem;color:#888;margin-top:6px;padding-bottom:20px;">
+          O PDF será baixado automaticamente · Punição registrada no histórico
+        </div>
+      </div>
+
+      <div id="punTabHistorico" style="display:none;">
+        <input class="pun-input" id="punHistBusca" type="search"
+          placeholder="🔍 Buscar no histórico..." oninput="renderHistorico()" style="margin-bottom:12px;">
+        <div id="punHistLista">
+          <div class="empty-state"><div class="icon">📋</div><p>Nenhuma punição registrada</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="pdf-toast" id="pdfToast">📄 PDF gerado!</div>
+
+<script>
+// ==================== LÓGICA PUNIÇÕES ====================
+const TRANSGRESSOES_LIST = [
+  { id: "col",   texto: "Desrespeito com o(a) colega" },
+  { id: "coord", texto: "Desrespeito com a Coordenação" },
+  { id: "prof",  texto: "Desrespeito com o(a) professor(a)" },
+  { id: "cmd",   texto: "Desrespeito com o Comandante" },
+  { id: "sub",   texto: "Desrespeito com o Subcomandante" },
+  { id: "ca",    texto: "Desrespeito com o Comandante do C.A" },
+  { id: "mon",   texto: "Desrespeito com o(a) Monitor(a)" },
+  { id: "fun",   texto: "Desrespeito com o funcionário da escola" },
+  { id: "nor",   texto: "Desobediência às normas da Escola / NGA" },
+  { id: "atsal", texto: "Atraso para estar em sala de aula" },
+  { id: "atent", texto: "Atraso para entrada na escola" },
+  { id: "dan",   texto: "Dano aos bens públicos" },
+  { id: "cel",   texto: "Uso indevido de celular nas dependências do CMCB" },
+  { id: "apr",   texto: "Apresentação pessoal fora do padrão regulamentar" },
+  { id: "for",   texto: "Ausência não justificada em formatura" },
+  { id: "ind",   texto: "Indisciplina em sala de aula" },
+  { id: "cnd",   texto: "Conduta incompatível com o ambiente escolar militar" },
+  { id: "otro",  texto: "Outro(s)" },
+];
+
+let _punTurmaId = null, _punAlunoId = null;
+let _punAlunoNome = null, _punTurmaLabel = null;
+let _punTransgressoesSel = new Set();
+let _punSancaoSel = 'advertencia';
+let _punNaturezaSel = 'LEVE';
+
+function buildTransgressaoGrid() {
+  const grid = document.getElementById('transgressaoGrid');
+  if (!grid) return;
+  grid.innerHTML = TRANSGRESSOES_LIST.map(t => `
+    <div class="transgressao-item" id="tr-item-${t.id}" onclick="toggleTransgressao('${t.id}','${t.texto.replace(/'/g,"\\'")}')">
+      <input type="checkbox" id="tr-${t.id}" onclick="event.stopPropagation()">
+      <label for="tr-${t.id}">${t.texto}</label>
+    </div>`).join('');
+}
+
+function toggleTransgressao(id, texto) {
+  const item = document.getElementById('tr-item-' + id);
+  const cb = document.getElementById('tr-' + id);
+  if (_punTransgressoesSel.has(texto)) {
+    _punTransgressoesSel.delete(texto); item.classList.remove('selected'); cb.checked = false;
+  } else {
+    _punTransgressoesSel.add(texto); item.classList.add('selected'); cb.checked = true;
+  }
+  document.getElementById('punOutroDiv').style.display = _punTransgressoesSel.has('Outro(s)') ? 'block' : 'none';
+}
+
+function selectSancao(btn) {
+  document.querySelectorAll('.sancao-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected'); _punSancaoSel = btn.dataset.sancao;
+}
+
+function selectNatureza(btn) {
+  document.querySelectorAll('.natureza-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected'); _punNaturezaSel = btn.dataset.nat;
+}
+
+function punMonitorChange(sel) {
+  document.getElementById('punMonitorOutroDiv').style.display = sel.value === 'outro' ? 'block' : 'none';
+}
+
+function punTab(tab, btn) {
+  document.querySelectorAll('.pun-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('punTabNova').style.display = tab === 'nova' ? 'block' : 'none';
+  document.getElementById('punTabHistorico').style.display = tab === 'historico' ? 'block' : 'none';
+  if (tab === 'historico') renderHistorico();
+}
+
+function abrirPunicaoModal(turmaId, alunoId, alunoNome, turmaLabel) {
+  _punTurmaId = turmaId; _punAlunoId = alunoId;
+  _punAlunoNome = alunoNome; _punTurmaLabel = turmaLabel;
+  _punTransgressoesSel = new Set(); _punSancaoSel = 'advertencia'; _punNaturezaSel = 'LEVE';
+
+  document.getElementById('punAlunoNome').value = alunoNome;
+  document.getElementById('punTurma').value = turmaLabel;
+  document.getElementById('punData').value = new Date().toISOString().split('T')[0];
+  document.getElementById('punDescricao').value = '';
+  document.getElementById('punDetalhesSancao').value = '';
+  document.getElementById('punOutroTexto').value = '';
+  document.getElementById('punMonitorSelect').value = '';
+  document.getElementById('punMonitorOutroDiv').style.display = 'none';
+  document.getElementById('punOutroDiv').style.display = 'none';
+
+  try {
+    const d = getData(turmaId, alunoId);
+    document.getElementById('punResponsavelNome').value = d && d.responsavel ? (d.responsavel.nome || '') : '';
+  } catch(e) {}
+
+  buildTransgressaoGrid();
+  document.querySelectorAll('.sancao-btn').forEach(b => b.classList.remove('selected'));
+  document.querySelector('[data-sancao="advertencia"]').classList.add('selected');
+  document.querySelectorAll('.natureza-btn').forEach(b => b.classList.remove('selected'));
+  document.querySelector('.natureza-btn.leve').classList.add('selected');
+
+  const puns = getPunicoesTurmaAluno(turmaId, alunoId);
+  document.getElementById('punNumero').value = String(puns.length + 1).padStart(3,'0') + '/' + new Date().getFullYear();
+  updatePunBadgeModal(turmaId, alunoId);
+
+  document.querySelectorAll('.pun-tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.pun-tab')[0].classList.add('active');
+  document.getElementById('punTabNova').style.display = 'block';
+  document.getElementById('punTabHistorico').style.display = 'none';
+  document.getElementById('punModal').classList.add('open');
+}
+
+function fecharPunModal() { document.getElementById('punModal').classList.remove('open'); }
+
+function getPunicoesTurmaAluno(turmaId, alunoId) {
+  try { return getData(turmaId, alunoId).punicoes || []; } catch(e) { return []; }
+}
+
+function savePunicao(turmaId, alunoId, punicao) {
+  try {
+    const data = getData(turmaId, alunoId);
+    if (!data) return;
+    if (!data.punicoes) data.punicoes = [];
+    data.punicoes.push(punicao);
+    if (typeof window.fbSave === 'function') {
+      window.fbSave('dados/' + turmaId + '_' + alunoId + '/punicoes', data.punicoes);
+    }
+    showPdfToast('✅ Punição registrada!');
+  } catch(e) { console.error('Erro ao salvar punição:', e); }
+}
+
+function deletePunicao(turmaId, alunoId, idx) {
+  if (!confirm('Remover esta punição do histórico?')) return;
+  try {
+    const data = getData(turmaId, alunoId);
+    if (!data || !data.punicoes) return;
+    data.punicoes.splice(idx, 1);
+    if (typeof window.fbSave === 'function') {
+      window.fbSave('dados/' + turmaId + '_' + alunoId + '/punicoes', data.punicoes);
+    }
+    renderHistorico(); updatePunBadge(turmaId, alunoId); updatePunBadgeModal(turmaId, alunoId);
+  } catch(e) {}
+}
+
+function updatePunBadge(turmaId, alunoId) {
+  const puns = getPunicoesTurmaAluno(turmaId, alunoId);
+  const b = document.getElementById('pun-badge-' + turmaId + '-' + alunoId);
+  if (b) { b.textContent = puns.length; b.style.display = puns.length > 0 ? 'inline-block' : 'none'; }
+}
+
+function updatePunBadgeModal(turmaId, alunoId) {
+  const puns = getPunicoesTurmaAluno(turmaId, alunoId);
+  const b = document.getElementById('punHistCount');
+  if (b) { b.textContent = puns.length; b.style.display = puns.length > 0 ? 'inline-block' : 'none'; }
+}
+
+function renderHistorico() {
+  const lista = document.getElementById('punHistLista');
+  if (!lista) return;
+  const busca = (document.getElementById('punHistBusca').value || '').toLowerCase();
+  const allPuns = getPunicoesTurmaAluno(_punTurmaId, _punAlunoId);
+  const puns = allPuns.filter(p => !busca || (p.aluno && p.aluno.toLowerCase().includes(busca))).slice().reverse();
+  if (puns.length === 0) {
+    lista.innerHTML = '<div class="empty-state"><div class="icon">📋</div><p>Nenhuma punição registrada</p></div>'; return;
+  }
+  const sL = { advertencia:'Advertência', estudo_obrigatorio:'Estudo Obrigatório', suspensao:'Suspensão', conselho_disciplina:'Conselho de Disciplina' };
+  lista.innerHTML = puns.map((p, i) => {
+    const realIdx = allPuns.length - 1 - i;
+    const trs = (p.transgressoes||[]).slice(0,2).join('; ') + ((p.transgressoes||[]).length > 2 ? '...' : '');
+    return `<div class="hist-item">
+      <div class="hist-item-header">
+        <div><div class="hist-item-aluno">📋 Nota ${p.numero||'—'}</div>
+        <div class="hist-item-date">${p.data||'—'} · ${p.monitor||'—'}</div></div>
+        <span class="hist-item-sancao ${p.sancao||''}">${sL[p.sancao]||p.sancao||'—'}</span>
+      </div>
+      <div class="hist-item-tr">🚫 ${trs||'—'}</div>
+      ${p.descricao ? `<div class="hist-item-tr" style="color:#666;font-style:italic">"${p.descricao.substring(0,100)}${p.descricao.length>100?'...':''}"</div>` : ''}
+      <div class="hist-item-actions">
+        <button class="hist-btn" onclick="baixarPdfHistorico('${_punTurmaId}',${_punAlunoId},${realIdx})">📄 Baixar PDF</button>
+        <button class="hist-btn del" onclick="deletePunicao('${_punTurmaId}',${_punAlunoId},${realIdx})">🗑️ Remover</button>
+      </div></div>`;
+  }).join('');
+}
+
+function baixarPdfHistorico(turmaId, alunoId, idx) {
+  const p = getPunicoesTurmaAluno(turmaId, alunoId)[idx];
+  if (p) gerarEBaixarPDF(p);
+}
+
+function formatDateBR(iso) {
+  if (!iso) return ''; const [y,m,d] = iso.split('-'); return d+'/'+m+'/'+y;
+}
+
+function gerarNotaPunicao() {
+  const monSel = document.getElementById('punMonitorSelect').value;
+  const monitor = monSel === 'outro' ? document.getElementById('punMonitorOutro').value.trim() : monSel;
+  if (!monitor) { alert('⚠️ Selecione o Monitor comunicante do fato!'); return; }
+  if (_punTransgressoesSel.size === 0) { alert('⚠️ Selecione pelo menos uma transgressão!'); return; }
+
+  const dados = {
+    numero: document.getElementById('punNumero').value,
+    dataEmissao: formatDateBR(document.getElementById('punData').value),
+    data: formatDateBR(document.getElementById('punData').value),
+    aluno: _punAlunoNome, turma: _punTurmaLabel, monitor: monitor,
+    transgressoes: Array.from(_punTransgressoesSel),
+    descricaoOutro: document.getElementById('punOutroTexto').value.trim(),
+    descricao: document.getElementById('punDescricao').value.trim(),
+    sancao: _punSancaoSel,
+    detalhesSancao: document.getElementById('punDetalhesSancao').value.trim(),
+    natureza: _punNaturezaSel,
+    responsavelNome: document.getElementById('punResponsavelNome').value.trim(),
+  };
+
+  savePunicao(_punTurmaId, _punAlunoId, dados);
+  updatePunBadge(_punTurmaId, _punAlunoId);
+  updatePunBadgeModal(_punTurmaId, _punAlunoId);
+  gerarEBaixarPDF(dados);
+}
+
+function gerarEBaixarPDF(dados) {
+  if (!window.jspdf || !window.jspdf.jsPDF) {
+    alert('Biblioteca PDF não disponível. Verifique a conexão e recarregue.'); return;
+  }
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const W = 210, ML = 18, MR = 18, CW = W - ML - MR;
+  let y = 14;
+  const verde = [45,58,30], cinza = [100,100,100], vermelho = [192,57,43];
+
+  // CABEÇALHO
+  doc.setFillColor(...verde); doc.rect(ML, y, CW, 16, 'F');
+  doc.setTextColor(255,255,255); doc.setFont('helvetica','bold');
+  doc.setFontSize(7.5);
+  doc.text('CORPO DE BOMBEIROS MILITAR\nDIRETORIA DE ENSINO E PESQUISA', ML+2, y+4.5);
+  doc.setFontSize(9); doc.text('COLÉGIO MILITAR 2 DE JULHO — UNIDADE LXXII', W/2, y+5, {align:'center'});
+  doc.setFontSize(7.5); doc.text('U.E.F NOHEMIA ALMEIDA', W/2, y+10, {align:'center'});
+  doc.text('PREF. BACABAL-MA — SEC. MUN. EDUCAÇÃO', W-MR-1, y+4.5, {align:'right'});
+  y += 20;
+
+  doc.setTextColor(...verde); doc.setFont('helvetica','bold'); doc.setFontSize(11);
+  doc.text('CONTROLE DE TRANSGRESSÃO DISCIPLINAR', W/2, y, {align:'center'}); y += 5;
+  doc.setFontSize(9); doc.text('Nº ' + (dados.numero||'—'), W/2, y, {align:'center'}); y += 4;
+  doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(...cinza);
+  doc.text('Bacabal - MA, ' + (dados.dataEmissao||'—'), W/2, y, {align:'center'}); y += 5;
+
+  doc.setDrawColor(138,154,91); doc.setLineWidth(0.5); doc.line(ML, y, W-MR, y); y += 5;
+
+  doc.setTextColor(30,30,30); doc.setFont('helvetica','normal'); doc.setFontSize(9.5);
+  const intro = 'Informamos que o(a) aluno(a) do ' + dados.turma + ', ' + dados.aluno + ', cometeu a seguinte transgressão:';
+  const introL = doc.splitTextToSize(intro, CW); doc.text(introL, ML, y); y += introL.length * 5 + 3;
+
+  doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(...verde);
+  doc.text('TRANSGRESSÕES COMETIDAS:', ML, y); y += 5;
+
+  TRANSGRESSOES_LIST.forEach(t => {
+    const sel = dados.transgressoes && dados.transgressoes.includes(t.texto);
+    doc.setFont('helvetica', sel ? 'bold' : 'normal');
+    doc.setTextColor(...(sel ? vermelho : [80,80,80]));
+    doc.setFontSize(8.5);
+    doc.text((sel ? '(X)' : '(  )') + '  ' + t.texto, ML+2, y); y += 4.5;
+    if (y > 270) { doc.addPage(); y = 14; }
+  });
+
+  if (dados.transgressoes && dados.transgressoes.includes('Outro(s)') && dados.descricaoOutro) {
+    doc.setFont('helvetica','italic'); doc.setTextColor(...cinza); doc.setFontSize(8.5);
+    doc.text('Descrição: ' + dados.descricaoOutro, ML+8, y); y += 5;
+  }
+
+  y += 2; doc.setDrawColor(138,154,91); doc.line(ML, y, W-MR, y); y += 5;
+
+  if (dados.descricao) {
+    doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(...verde);
+    doc.text('DESCRIÇÃO DO FATO:', ML, y); y += 5;
+    doc.setFont('helvetica','normal'); doc.setTextColor(30,30,30); doc.setFontSize(9);
+    const dl = doc.splitTextToSize(dados.descricao, CW); doc.text(dl, ML, y); y += dl.length * 5 + 3;
+    doc.setDrawColor(138,154,91); doc.line(ML, y, W-MR, y); y += 5;
+  }
+
+  const sL2 = {advertencia:'ADVERTÊNCIA', estudo_obrigatorio:'ESTUDO OBRIGATÓRIO', suspensao:'SUSPENSÃO', conselho_disciplina:'CONSELHO DE DISCIPLINA'};
+  let st = 'O(a) estudante fica punido(a) com ' + (sL2[dados.sancao]||dados.sancao||'—');
+  if (dados.detalhesSancao) st += ', ' + dados.detalhesSancao;
+  st += ', por cometer falta disciplinar de natureza ' + (dados.natureza||'LEVE') + '.';
+  doc.setFont('helvetica','normal'); doc.setFontSize(9.5); doc.setTextColor(30,30,30);
+  const sl2 = doc.splitTextToSize(st, CW); doc.text(sl2, ML, y); y += sl2.length * 5 + 4;
+
+  const legal = 'Comunicamos que as providências serão tomadas em conformidade ao Regimento Interno do CMCB do Corpo de Bombeiros Militar do Maranhão, às NGA do CMCB LXXII e à LDB (Lei 9.394/1996). Este documento deverá ser devolvido à Escola, devidamente assinado pelos pais ou responsáveis.';
+  doc.setFontSize(8.5); doc.setTextColor(60,60,60);
+  const ll = doc.splitTextToSize(legal, CW); doc.text(ll, ML, y); y += ll.length * 4.5 + 3;
+  const l2 = 'Para a veracidade dos fatos, o presente documento deverá ser assinado em duas vias. Caso o aluno se recuse a assinar, admitir-se-á como verídicos os fatos expostos.';
+  const l2l = doc.splitTextToSize(l2, CW); doc.text(l2l, ML, y); y += l2l.length * 4.5 + 6;
+
+  if (y > 240) { doc.addPage(); y = 20; }
+
+  doc.setDrawColor(...verde); doc.setLineWidth(1); doc.line(ML, y, W-MR, y); y += 10;
+  const sw = CW/2 - 4, xL = ML, xR = ML + CW/2 + 4;
+  function drawSign(x, nome, cargo) {
+    doc.setDrawColor(100,100,100); doc.setLineWidth(0.3); doc.line(x, y, x+sw, y);
+    doc.setFont('helvetica','bold'); doc.setFontSize(8.5); doc.setTextColor(30,30,30);
+    const nl = doc.splitTextToSize(nome, sw); doc.text(nl, x+sw/2, y+4, {align:'center'});
+    doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(...cinza);
+    const cl = doc.splitTextToSize(cargo, sw); doc.text(cl, x+sw/2, y+4+(nl.length*4), {align:'center'});
+  }
+  drawSign(xL, 'CAP Diego Fernandes Brandão', 'Comandante do C.A do CMCB LXXII');
+  drawSign(xR, dados.monitor||'_______________', 'Monitor(a) Comunicante do Fato');
+  y += 24;
+  drawSign(xL, dados.aluno||'_______________', 'Aluno(a) Notificado(a)');
+  drawSign(xR, dados.responsavelNome||'_______________', 'Responsável pelo(a) Aluno(a)');
+  y += 22;
+
+  doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(...cinza);
+  doc.setDrawColor(138,154,91); doc.setLineWidth(0.5); doc.line(ML, y, W-MR, y); y += 4;
+  doc.text('Gerado em ' + new Date().toLocaleDateString('pt-BR') + ' · CMCB LXXII — U.E.F Nohemia Almeida — Bacabal/MA', W/2, y, {align:'center'});
+
+  const fn = 'Punicao_' + (dados.aluno||'').replace(/\s+/g,'_') + '_' + (dados.numero||'').replace('/','_') + '.pdf';
+  doc.save(fn);
+  showPdfToast('📄 PDF gerado com sucesso!');
+}
+
+function showPdfToast(msg) {
+  const t = document.getElementById('pdfToast');
+  if (!t) return; t.textContent = msg||'📄 PDF gerado!'; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+document.getElementById('punModal').addEventListener('click', function(e) {
+  if (e.target === this) fecharPunModal();
+});
+</script>
+
 </body>
 </html>
