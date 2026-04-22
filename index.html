@@ -1723,7 +1723,8 @@ function getWorkdays(year, month) {
 function getFaltaCount(turmaId, alunoId, year, month) {
   const data = getData(turmaId, alunoId);
   if (!data || !data.faltas) return 0;
-  return Object.keys(data.faltas).filter(k => k.startsWith(year+'-'+month+'-')).length;
+  const mStr = month < 10 ? '0'+month : ''+month;
+  return Object.keys(data.faltas).filter(k => k.startsWith(year+'-'+mStr+'-')).length;
 }
 
 // ==================== UI HELPERS ====================
@@ -1767,6 +1768,7 @@ window.renderAlunoList = function renderAlunoList() {
   if (!selectedTurma) return;
   if (!turmas || turmas.length === 0) return;
   const turma = turmas.find(t => t.id === selectedTurma);
+  if (!turma) return;
   const month = parseInt(document.getElementById('monthSelect').value);
   const year = 2026;
   const workdays = getWorkdays(year, month);
@@ -1777,7 +1779,7 @@ window.renderAlunoList = function renderAlunoList() {
   const container = document.getElementById('alunosContainer');
   container.innerHTML = '';
 
-  let alunos = turma.alunos;
+  let alunos = turma.alunos || [];
   if (search) alunos = alunos.filter(a => a.nome.toLowerCase().includes(search));
 
   if (alunos.length === 0) {
@@ -1908,7 +1910,7 @@ window.renderAlunoList = function renderAlunoList() {
             <!-- Falta input simples -->
             <div class="falta-input-row">
               <input type="date" class="falta-date-input" id="falta-date-${turma.id}-${aluno.id}"
-                min="${year}-0${month < 10 ? '0'+month : month}-01"
+                min="${year}-${month < 10 ? '0'+month : month}-01"
                 value="${year}-${month < 10 ? '0'+month : month}-${new Date().getDate() < 10 ? '0'+new Date().getDate() : new Date().getDate()}">
               <button class="falta-add-btn" onclick="addFalta('${turma.id}', ${aluno.id})">
                 ➕ REGISTRAR
@@ -1917,7 +1919,8 @@ window.renderAlunoList = function renderAlunoList() {
             <!-- Faltas registradas como tags -->
             <div class="faltas-tags" id="faltas-tags-${turma.id}-${aluno.id}">
               ${(function() {
-                const keys = Object.keys(data.faltas || {}).filter(k => k.startsWith(year+'-'+month+'-')).sort((a,b) => parseInt(a.split('-')[2]) - parseInt(b.split('-')[2]));
+                const mKey = month < 10 ? '0'+month : ''+month;
+                const keys = Object.keys(data.faltas || {}).filter(k => k.startsWith(year+'-'+mKey+'-')).sort((a,b) => parseInt(a.split('-')[2]) - parseInt(b.split('-')[2]));
                 if (keys.length === 0) return '<span class="faltas-empty">Nenhuma falta registrada</span>';
                 return keys.map(k => {
                   const d = k.split('-')[2].padStart(2,'0');
@@ -2317,7 +2320,8 @@ function refreshFaltasDias(turmaId, alunoId) {
   // Update dias list
   const diasEl = document.getElementById('faltas-dias-' + turmaId + '-' + alunoId);
   if (diasEl) {
-    const dias = Object.keys(data.faltas).filter(k => k.startsWith(year + '-' + month + '-')).sort((a,b) => {
+    const mStr2 = month < 10 ? '0'+month : ''+month;
+    const dias = Object.keys(data.faltas).filter(k => k.startsWith(year + '-' + mStr2 + '-')).sort((a,b) => {
       return parseInt(a.split('-')[2]) - parseInt(b.split('-')[2]);
     });
     if (dias.length === 0) {
