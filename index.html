@@ -1886,8 +1886,8 @@ window.renderAlunoList = function renderAlunoList() {
               <button class="btn-punicao"
                 data-tid="${turma.id}"
                 data-aid="${aluno.id}"
-                data-nome="${aluno.nome.replace(/"/g,'&quot;')}"
-                data-turma="${turma.nome.replace(/"/g,'&quot;')}"
+                data-nome="${aluno.nome}"
+                data-turma="${turma.nome}"
                 onclick="event.stopPropagation(); var b=this; abrirPunicaoModal(b.dataset.tid, parseInt(b.dataset.aid), b.dataset.nome, b.dataset.turma)">
                 ⚖️ REGISTRAR NOTA DE PUNIÇÃO
                 <span class="punicao-count-badge" id="pun-badge-${turma.id}-${aluno.id}" style="display:none">0</span>
