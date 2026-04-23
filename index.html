@@ -1141,6 +1141,9 @@ body {
   <div class="turma-selector-section">
     <h2>📋 Selecionar Turma</h2>
     <div class="turma-grid" id="turmaGrid"></div>
+    <div id="acessoEmergencial1Ano" style="margin-top:10px;padding-top:10px;border-top:1px dashed #c5bb8e;">
+      <button type="button" id="btnAcesso1AnoEmergencial" class="turma-btn" style="background:#8b1a1a;color:#fff3c4;border-color:#c9a84c;">ACESSO EMERGENCIAL — 1º ANO VESP.</button>
+    </div>
   </div>
 
   <div class="controls-bar" id="controlsBar" style="display:none;">
@@ -1801,6 +1804,24 @@ function renderTurmaButtons() {
     btn.onclick = () => selectTurma(t.id);
     grid.appendChild(btn);
   });
+
+  const temAcesso = turmas.some(t => t.id === '1ANO_VESP_ACESSO');
+  const jaExisteNoDOM = Array.from(grid.querySelectorAll('button')).some(b => b.textContent.includes('ACESSO') || b.textContent.includes('Acesso'));
+  if (!jaExisteNoDOM) {
+    const acessoBtn = document.createElement('button');
+    acessoBtn.className = 'turma-btn' + (selectedTurma === '1ANO_VESP_ACESSO' ? ' active' : '');
+    acessoBtn.textContent = 'ACESSO EMERGENCIAL — 1º ANO';
+    acessoBtn.style.background = '#8b1a1a';
+    acessoBtn.style.color = '#fff3c4';
+    acessoBtn.style.borderColor = '#c9a84c';
+    acessoBtn.onclick = () => selectTurma(temAcesso ? '1ANO_VESP_ACESSO' : '1ANO_VESP');
+    grid.appendChild(acessoBtn);
+  }
+
+  const btnEmergencia = document.getElementById('btnAcesso1AnoEmergencial');
+  if (btnEmergencia) {
+    btnEmergencia.onclick = () => selectTurma(temAcesso ? '1ANO_VESP_ACESSO' : '1ANO_VESP');
+  }
 }
 
 function selectTurma(id) {
