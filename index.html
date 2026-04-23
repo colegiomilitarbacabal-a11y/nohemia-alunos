@@ -1169,24 +1169,25 @@ body {
       <p>Selecione uma turma</p>
     </div>
   </div>
-</main>
 
-<!-- ===== MODAL CALENDÁRIO DE FALTAS ===== -->
-<div id="calOverlay" onclick="if(event.target===this)fecharCal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:900;align-items:flex-start;justify-content:center;padding-top:50px;">
+<div id="calOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:900;align-items:flex-start;justify-content:center;padding-top:50px;" onclick="if(event.target===this)fecharCal()">
   <div style="background:#f5f0e8;border-radius:16px;padding:18px 16px 22px;max-width:340px;width:95%;box-shadow:0 10px 40px rgba(0,0,0,0.35);max-height:85vh;overflow-y:auto;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-      <span id="calAlunoNome" style="font-family:Oswald,sans-serif;font-size:1rem;color:#2d3a1e;font-weight:700;letter-spacing:0.5px;"></span>
-      <button onclick="fecharCal()" style="background:rgba(0,0,0,0.1);border:none;border-radius:50%;width:30px;height:30px;font-size:1.1rem;cursor:pointer;color:#555;display:flex;align-items:center;justify-content:center;">✕</button>
+      <span id="calAlunoNome" style="font-family:Oswald,sans-serif;font-size:1rem;color:#2d3a1e;font-weight:700;"></span>
+      <button onclick="fecharCal()" style="background:rgba(0,0,0,0.1);border:none;border-radius:50%;width:30px;height:30px;font-size:1.1rem;cursor:pointer;">✕</button>
     </div>
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
       <button onclick="calNavMes(-1)" style="background:#2d3a1e;color:#e8c96a;border:none;border-radius:8px;padding:8px 18px;font-size:1rem;cursor:pointer;font-family:Oswald,sans-serif;font-weight:700;">◀</button>
-      <span id="calMonthLabel" style="font-family:Oswald,sans-serif;font-size:0.9rem;color:#2d3a1e;font-weight:700;letter-spacing:0.5px;text-align:center;flex:1;"></span>
+      <span id="calMonthLabel" style="font-family:Oswald,sans-serif;font-size:0.9rem;color:#2d3a1e;font-weight:700;text-align:center;flex:1;"></span>
       <button onclick="calNavMes(+1)" style="background:#2d3a1e;color:#e8c96a;border:none;border-radius:8px;padding:8px 18px;font-size:1rem;cursor:pointer;font-family:Oswald,sans-serif;font-weight:700;">▶</button>
     </div>
     <div id="calGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:12px;"></div>
     <div class="cal-footer" style="text-align:center;font-size:0.75rem;color:#999;border-top:1px solid #ddd;padding-top:8px;">Toque no dia para marcar/desmarcar falta</div>
   </div>
 </div>
+  </div>
+</div>
+</main>
 
 <script>
 // ==================== DATA ====================
