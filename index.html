@@ -1654,15 +1654,15 @@ function showToast() {
 
 // ==================== NIVEL DE COR ====================
 function calcNivel(avaliacao) {
+  const safe = { ...getDefaultData().avaliacao, ...((avaliacao && typeof avaliacao === 'object') ? avaliacao : {}) };
   const campos = ['disciplina','ordemUnida','apresentacao','habilFisica','habilPortugues','habilMatematica'];
-  // nao_atribuido = not counted
-  const atribuidos = campos.filter(c => avaliacao[c] && avaliacao[c] !== 'nao_atribuido');
-  if (atribuidos.length === 0 && avaliacao.familiar === 'receptivo') return 'neutro';
+  const atribuidos = campos.filter(c => safe[c] && safe[c] !== 'nao_atribuido');
+  if (atribuidos.length === 0 && safe.familiar === 'receptivo') return 'neutro';
   const pontos = campos.map(c => {
-    if (!avaliacao[c] || avaliacao[c] === 'nao_atribuido') return null;
-    return avaliacao[c] === 'alterado' ? 2 : avaliacao[c] === 'regular' ? 1 : 0;
+    if (!safe[c] || safe[c] === 'nao_atribuido') return null;
+    return safe[c] === 'alterado' ? 2 : safe[c] === 'regular' ? 1 : 0;
   }).filter(p => p !== null);
-  const familiar = avaliacao.familiar === 'hostil' ? 2 : 0;
+  const familiar = safe.familiar === 'hostil' ? 2 : 0;
   pontos.push(familiar);
   const total = pontos.reduce((a,b) => a+b, 0);
   const max = pontos.length * 2;
@@ -1726,13 +1726,16 @@ function getData(turmaId, alunoId) {
 }
 
 function calcIdade(nascStr) {
+  if (typeof nascStr !== 'string' || !nascStr.includes('/')) return 0;
   const [d, m, y] = nascStr.split('/').map(Number);
+  if (!d || !m || !y) return 0;
   const nasc = new Date(y, m-1, d);
+  if (Number.isNaN(nasc.getTime())) return 0;
   const hoje = new Date();
   let idade = hoje.getFullYear() - nasc.getFullYear();
   const mDiff = hoje.getMonth() - nasc.getMonth();
   if (mDiff < 0 || (mDiff === 0 && hoje.getDate() < nasc.getDate())) idade--;
-  return idade;
+  return Math.max(0, idade);
 }
 
 function getWorkdays(year, month) {
@@ -1787,186 +1790,221 @@ function selectTurma(id) {
 
 // ==================== RENDER ALUNOS ====================
 window.renderAlunoList = function renderAlunoList() {
-  // Always sync from global Firebase data
-  alunoData = window.alunoData;
-  selectedTurma = window.selectedTurma || selectedTurma;
-  if (!selectedTurma) return;
-  if (!turmas || turmas.length === 0) return;
-  const turma = turmas.find(t => t.id === selectedTurma);
-  if (!turma) return;
-  const month = parseInt(document.getElementById('monthSelect').value);
-  const year = 2026;
-  const workdays = getWorkdays(year, month);
-  const search = (document.getElementById('searchInput').value || '').toLowerCase().trim();
+  try {
+    alunoData = window.alunoData || {};
+    selectedTurma = window.selectedTurma || selectedTurma;
+    if (!selectedTurma) return;
+    if (!Array.isArray(turmas) || turmas.length === 0) return;
 
-  const monthNames = ['','Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+    const turma = turmas.find(t => t.id === selectedTurma);
+    if (!turma) return;
 
-  const container = document.getElementById('alunosContainer');
-  container.innerHTML = '';
+    const monthEl = document.getElementById('monthSelect');
+    const searchEl = document.getElementById('searchInput');
+    const container = document.getElementById('alunosContainer');
+    if (!monthEl || !searchEl || !container) return;
 
-  let alunos = turma.alunos || [];
-  if (search) alunos = alunos.filter(a => a.nome.toLowerCase().includes(search));
+    const month = parseInt(monthEl.value, 10) || (new Date().getMonth() + 1);
+    const year = 2026;
+    const search = (searchEl.value || '').toLowerCase().trim();
+    const monthNames = ['','Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 
-  if (alunos.length === 0) {
-    container.innerHTML = `<div class="empty-state"><div class="icon">🔍</div><p>Nenhum aluno encontrado</p></div>`;
-    return;
-  }
+    container.innerHTML = '';
 
-  const list = document.createElement('div');
-  list.className = 'alunos-list';
+    let alunos = Array.isArray(turma.alunos) ? [...turma.alunos] : [];
+    if (search) {
+      alunos = alunos.filter(a => String((a && a.nome) || '').toLowerCase().includes(search));
+    }
 
-  alunos.forEach(aluno => {
-    const data = getData(turma.id, aluno.id);
-    const faltaCount = getFaltaCount(turma.id, aluno.id, year, month);
-    const idade = calcIdade(aluno.nascimento);
-    const iniciais = aluno.nome.split(' ').slice(0,2).map(n=>n[0]).join('');
-    const nivel = calcNivel(data.avaliacao);
-    const nivelClass = 'nivel-' + nivel;
+    if (alunos.length === 0) {
+      container.innerHTML = `<div class="empty-state"><div class="icon">🔍</div><p>Nenhum aluno encontrado</p></div>`;
+      return;
+    }
 
-    const card = document.createElement('div');
-    card.className = 'aluno-card' + (aluno.especial ? ' especial' : '');
+    const list = document.createElement('div');
+    list.className = 'alunos-list';
+    const renderErrors = [];
 
-    card.innerHTML = `
-      <div class="status-stripe ${nivelClass}" id="stripe-${turma.id}-${aluno.id}" title="${getNivelLabel(nivel)}"></div>
-      <div class="aluno-header" onclick="toggleCard(this)">
-        <div class="aluno-foto-area">
-          <div class="aluno-foto" id="foto-${turma.id}-${aluno.id}">
-            ${data.foto ? '<img src="' + data.foto + '" alt="">' : '<span>' + iniciais + '</span>'}
-          </div>
-          <button class="foto-upload-btn" onclick="event.stopPropagation(); uploadFoto(this)" data-tid="${turma.id}" data-aid="${aluno.id}" title="Foto">📷</button>
-          <input type="file" class="foto-input" id="foto-input-${turma.id}-${aluno.id}" accept="image/*">
-        </div>
+    alunos.forEach((rawAluno, index) => {
+      try {
+        const aluno = {
+          id: rawAluno?.id ?? (index + 1),
+          nome: String(rawAluno?.nome || 'Aluno sem nome'),
+          sexo: rawAluno?.sexo === 'F' ? 'F' : 'M',
+          nascimento: typeof rawAluno?.nascimento === 'string' ? rawAluno.nascimento : '01/01/2010',
+          especial: rawAluno?.especial || ''
+        };
 
-        <div class="aluno-info">
-          <div class="aluno-nome">
-            ${aluno.nome}
-            <span class="nivel-badge ${nivelClass}" id="badge-${turma.id}-${aluno.id}" title="${getNivelLabel(nivel)}"></span>
-          </div>
-          <div class="aluno-meta">
-            <span>${aluno.sexo === 'M' ? '👦' : '👧'} ${idade}a</span>
-            <span>📅 ${aluno.nascimento}</span>
-            ${aluno.especial ? '<span class="especial-badge tooltip-container" onclick="event.stopPropagation(); this.classList.toggle(\'tapped\')">⚠️ ATÍPICO<div class="tooltip-box">' + aluno.especial + '</div></span>' : ''}
-          </div>
-        </div>
+        const data = normalizeAlunoData(getData(turma.id, aluno.id));
+        window.alunoData[getKey(turma.id, aluno.id)] = data;
 
-        <div class="header-right">
-          <div class="faltas-quick">
-            <div class="falta-count ${faltaCount >= 5 ? 'alerta' : ''}" id="falta-count-${turma.id}-${aluno.id}">${faltaCount}</div>
-            <div class="falta-label">Faltas</div>
-            <span class="falta-alert-icon" id="falta-icon-${turma.id}-${aluno.id}" style="display:${faltaCount>=5?'inline':'none'}">⚠️</span>
-          </div>
-          <button class="btn-falta" onclick="event.stopPropagation(); marcarHoje(this)" data-tid="${turma.id}" data-aid="${aluno.id}">
-            📌 HOJE
-          </button>
-          <div class="expand-arrow" id="arrow-${turma.id}-${aluno.id}">▼</div>
-        </div>
-      </div>
+        const faltaCount = getFaltaCount(turma.id, aluno.id, year, month);
+        const idade = calcIdade(aluno.nascimento);
+        const iniciais = aluno.nome.split(' ').filter(Boolean).slice(0,2).map(n => n[0]).join('') || 'AL';
+        const nivel = calcNivel(data.avaliacao);
+        const nivelClass = 'nivel-' + nivel;
 
-      <div class="aluno-body" id="body-${turma.id}-${aluno.id}" onclick="event.stopPropagation()">
-        <div class="aluno-body-grid">
+        const card = document.createElement('div');
+        card.className = 'aluno-card' + (aluno.especial ? ' especial' : '');
 
-          <div>
-            <div class="section-label">📊 Avaliação Comportamental e Acadêmica</div>
-            <div class="avaliacao-grid">
-              ${renderSelect(turma.id, aluno.id, 'disciplina', 'Disciplina')}
-              ${renderSelect(turma.id, aluno.id, 'ordemUnida', 'Ordem Unida')}
-              ${renderSelect(turma.id, aluno.id, 'apresentacao', 'Apresentação')}
-              ${renderSelect(turma.id, aluno.id, 'habilFisica', 'Hab. Física')}
-              ${renderSelect(turma.id, aluno.id, 'habilPortugues', 'Português')}
-              ${renderSelect(turma.id, aluno.id, 'habilMatematica', 'Matemática')}
+        card.innerHTML = `
+          <div class="status-stripe ${nivelClass}" id="stripe-${turma.id}-${aluno.id}" title="${getNivelLabel(nivel)}"></div>
+          <div class="aluno-header" onclick="toggleCard(this)">
+            <div class="aluno-foto-area">
+              <div class="aluno-foto" id="foto-${turma.id}-${aluno.id}">
+                ${data.foto ? '<img src="' + data.foto + '" alt="">' : '<span>' + iniciais + '</span>'}
+              </div>
+              <button class="foto-upload-btn" onclick="event.stopPropagation(); uploadFoto(this)" data-tid="${turma.id}" data-aid="${aluno.id}" title="Foto">📷</button>
+              <input type="file" class="foto-input" id="foto-input-${turma.id}-${aluno.id}" accept="image/*">
             </div>
 
-            <div style="margin-top:14px;">
-              <div class="section-label">👨‍👩‍👧 Relação Familiar</div>
-              <select class="familiar-select ${data.avaliacao.familiar}"
-                id="familiar-${turma.id}-${aluno.id}"
-                onchange="updateFamiliar('${turma.id}', ${aluno.id}, this)">
-                <option value="receptivo" ${data.avaliacao.familiar==='receptivo'?'selected':''}>✅ Receptivo</option>
-                <option value="hostil" ${data.avaliacao.familiar==='hostil'?'selected':''}>⛔ Hostil</option>
-              </select>
-            </div>
-
-            <div style="margin-top:14px;">
-              <div class="section-label">📞 Responsável</div>
-              <div class="responsavel-grid">
-                <div class="responsavel-field">
-                  <label>Nome do Responsável</label>
-                  <input type="text" placeholder="Nome completo" value="${data.responsavel.nome}"
-                    onchange="updateResponsavel('${turma.id}', ${aluno.id}, 'nome', this.value)">
-                </div>
-                <div class="responsavel-field">
-                  <label>Telefone</label>
-                  <input type="tel" placeholder="(98) 9XXXX-XXXX" value="${data.responsavel.telefone}"
-                    onchange="updateResponsavel('${turma.id}', ${aluno.id}, 'telefone', this.value)">
-                </div>
+            <div class="aluno-info">
+              <div class="aluno-nome">
+                ${aluno.nome}
+                <span class="nivel-badge ${nivelClass}" id="badge-${turma.id}-${aluno.id}" title="${getNivelLabel(nivel)}"></span>
+              </div>
+              <div class="aluno-meta">
+                <span>${aluno.sexo === 'M' ? '👦' : '👧'} ${idade}a</span>
+                <span>📅 ${aluno.nascimento}</span>
+                ${aluno.especial ? '<span class="especial-badge tooltip-container" onclick="event.stopPropagation(); this.classList.toggle('tapped')">⚠️ ATÍPICO<div class="tooltip-box">' + aluno.especial + '</div></span>' : ''}
               </div>
             </div>
 
-            <div style="margin-top:14px;">
-              <div class="section-label">📝 Observações</div>
-              <textarea class="obs-textarea" placeholder="Observações sobre o aluno..."
-                onchange="updateObs('${turma.id}', ${aluno.id}, this.value)">${data.obs}</textarea>
-            </div>
-
-            <div style="margin-top:14px;">
-              <div class="section-label">⚖️ Punições Disciplinares</div>
-              <button class="btn-punicao"
-                data-tid="${turma.id}"
-                data-aid="${aluno.id}"
-                data-nome="${aluno.nome}"
-                data-turma="${turma.nome}"
-                onclick="event.stopPropagation(); var b=this; abrirPunicaoModal(b.dataset.tid, parseInt(b.dataset.aid), b.dataset.nome, b.dataset.turma)">
-                ⚖️ REGISTRAR NOTA DE PUNIÇÃO
-                <span class="punicao-count-badge" id="pun-badge-${turma.id}-${aluno.id}" style="display:none">0</span>
+            <div class="header-right">
+              <div class="faltas-quick">
+                <div class="falta-count ${faltaCount >= 5 ? 'alerta' : ''}" id="falta-count-${turma.id}-${aluno.id}">${faltaCount}</div>
+                <div class="falta-label">Faltas</div>
+                <span class="falta-alert-icon" id="falta-icon-${turma.id}-${aluno.id}" style="display:${faltaCount>=5?'inline':'none'}">⚠️</span>
+              </div>
+              <button class="btn-falta" onclick="event.stopPropagation(); marcarHoje(this)" data-tid="${turma.id}" data-aid="${aluno.id}">
+                📌 HOJE
               </button>
+              <div class="expand-arrow" id="arrow-${turma.id}-${aluno.id}">▼</div>
             </div>
           </div>
 
-          <div>
-            <div class="section-label">📅 Registro de Faltas — ${monthNames[month]} 2026</div>
-            
-            <!-- Falta count badge -->
-            <div class="faltas-mes-badge" id="faltas-sum-${turma.id}-${aluno.id}">
-              <span class="num ${faltaCount >= 5 ? 'alerta' : ''}" id="falta-num-${turma.id}-${aluno.id}">${faltaCount}</span>
-              <span class="txt">Falta${faltaCount !== 1 ? 's' : ''}<br>no mês</span>
-              ${faltaCount >= 5 ? '<span class="warn-icon">⚠️</span>' : ''}
-            </div>
+          <div class="aluno-body" id="body-${turma.id}-${aluno.id}" onclick="event.stopPropagation()">
+            <div class="aluno-body-grid">
 
-            <!-- Falta input simples -->
-            <div class="falta-input-row">
-              <input type="date" class="falta-date-input" id="falta-date-${turma.id}-${aluno.id}"
-                min="${year}-${month < 10 ? '0'+month : month}-01"
-                value="${year}-${month < 10 ? '0'+month : month}-${new Date().getDate() < 10 ? '0'+new Date().getDate() : new Date().getDate()}">
-              <button class="falta-add-btn" onclick="addFalta('${turma.id}', ${aluno.id})">
-                ➕ REGISTRAR
-              </button>
-            </div>
-            <!-- Faltas registradas como tags -->
-            <div class="faltas-tags" id="faltas-tags-${turma.id}-${aluno.id}">
-              ${(function() {
-                const _mKey = (month < 10 ? '0' : '') + month;
-                const keys = Object.keys(data.faltas || {}).filter(k => k.startsWith(year+'-'+_mKey+'-')).sort((a,b) => parseInt(a.split('-')[2]) - parseInt(b.split('-')[2]));
-                if (keys.length === 0) return '<span class="faltas-empty">Nenhuma falta registrada</span>';
-                return keys.map(k => {
-                  const d = k.split('-')[2].padStart(2,'0');
-                  const m = k.split('-')[1].padStart(2,'0');
-                  return '<span class="falta-tag">📅 ' + d + '/' + m + '<button class="falta-tag-remove" onclick="removeFalta(\'' + turma.id + '\', ' + aluno.id + ', \'' + k + '\')">✕</button></span>';
-                }).join('');
-              })()}
+              <div>
+                <div class="section-label">📊 Avaliação Comportamental e Acadêmica</div>
+                <div class="avaliacao-grid">
+                  ${renderSelect(turma.id, aluno.id, 'disciplina', 'Disciplina')}
+                  ${renderSelect(turma.id, aluno.id, 'ordemUnida', 'Ordem Unida')}
+                  ${renderSelect(turma.id, aluno.id, 'apresentacao', 'Apresentação')}
+                  ${renderSelect(turma.id, aluno.id, 'habilFisica', 'Hab. Física')}
+                  ${renderSelect(turma.id, aluno.id, 'habilPortugues', 'Português')}
+                  ${renderSelect(turma.id, aluno.id, 'habilMatematica', 'Matemática')}
+                </div>
+
+                <div style="margin-top:14px;">
+                  <div class="section-label">👨‍👩‍👧 Relação Familiar</div>
+                  <select class="familiar-select ${data.avaliacao.familiar}"
+                    id="familiar-${turma.id}-${aluno.id}"
+                    onchange="updateFamiliar('${turma.id}', ${aluno.id}, this)">
+                    <option value="receptivo" ${data.avaliacao.familiar==='receptivo'?'selected':''}>✅ Receptivo</option>
+                    <option value="hostil" ${data.avaliacao.familiar==='hostil'?'selected':''}>⛔ Hostil</option>
+                  </select>
+                </div>
+
+                <div style="margin-top:14px;">
+                  <div class="section-label">📞 Responsável</div>
+                  <div class="responsavel-grid">
+                    <div class="responsavel-field">
+                      <label>Nome do Responsável</label>
+                      <input type="text" placeholder="Nome completo" value="${data.responsavel.nome}"
+                        onchange="updateResponsavel('${turma.id}', ${aluno.id}, 'nome', this.value)">
+                    </div>
+                    <div class="responsavel-field">
+                      <label>Telefone</label>
+                      <input type="tel" placeholder="(98) 9XXXX-XXXX" value="${data.responsavel.telefone}"
+                        onchange="updateResponsavel('${turma.id}', ${aluno.id}, 'telefone', this.value)">
+                    </div>
+                  </div>
+                </div>
+
+                <div style="margin-top:14px;">
+                  <div class="section-label">📝 Observações</div>
+                  <textarea class="obs-textarea" placeholder="Observações sobre o aluno..."
+                    onchange="updateObs('${turma.id}', ${aluno.id}, this.value)">${data.obs}</textarea>
+                </div>
+
+                <div style="margin-top:14px;">
+                  <div class="section-label">⚖️ Punições Disciplinares</div>
+                  <button class="btn-punicao"
+                    data-tid="${turma.id}"
+                    data-aid="${aluno.id}"
+                    data-nome="${aluno.nome}"
+                    data-turma="${turma.nome}"
+                    onclick="event.stopPropagation(); var b=this; abrirPunicaoModal(b.dataset.tid, parseInt(b.dataset.aid), b.dataset.nome, b.dataset.turma)">
+                    ⚖️ REGISTRAR NOTA DE PUNIÇÃO
+                    <span class="punicao-count-badge" id="pun-badge-${turma.id}-${aluno.id}" style="display:none">0</span>
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <div class="section-label">📅 Registro de Faltas — ${monthNames[month]} 2026</div>
+                <div class="faltas-mes-badge" id="faltas-sum-${turma.id}-${aluno.id}">
+                  <span class="num ${faltaCount >= 5 ? 'alerta' : ''}" id="falta-num-${turma.id}-${aluno.id}">${faltaCount}</span>
+                  <span class="txt">Falta${faltaCount !== 1 ? 's' : ''}<br>no mês</span>
+                  ${faltaCount >= 5 ? '<span class="warn-icon">⚠️</span>' : ''}
+                </div>
+
+                <div class="falta-input-row">
+                  <input type="date" class="falta-date-input" id="falta-date-${turma.id}-${aluno.id}"
+                    min="${year}-${month < 10 ? '0'+month : month}-01"
+                    value="${year}-${month < 10 ? '0'+month : month}-${new Date().getDate() < 10 ? '0'+new Date().getDate() : new Date().getDate()}">
+                  <button class="falta-add-btn" onclick="addFalta('${turma.id}', ${aluno.id})">
+                    ➕ REGISTRAR
+                  </button>
+                </div>
+
+                <div class="faltas-tags" id="faltas-tags-${turma.id}-${aluno.id}">
+                  ${(function() {
+                    const _mKey = (month < 10 ? '0' : '') + month;
+                    const keys = Object.keys(data.faltas || {}).filter(k => k.startsWith(year+'-'+_mKey+'-')).sort((a,b) => parseInt(a.split('-')[2]) - parseInt(b.split('-')[2]));
+                    if (keys.length === 0) return '<span class="faltas-empty">Nenhuma falta registrada</span>';
+                    return keys.map(k => {
+                      const d = k.split('-')[2].padStart(2,'0');
+                      const m = k.split('-')[1].padStart(2,'0');
+                      return '<span class="falta-tag">📅 ' + d + '/' + m + '<button class="falta-tag-remove" onclick="removeFalta('' + turma.id + '', ' + aluno.id + ', '' + k + '')">✕</button></span>';
+                    }).join('');
+                  })()}
+                </div>
+              </div>
+
             </div>
           </div>
+        `;
+        list.appendChild(card);
+      } catch (err) {
+        console.error('Erro ao renderizar aluno', turma.id, rawAluno, err);
+        renderErrors.push((rawAluno && rawAluno.nome) ? rawAluno.nome : `Aluno ${index + 1}`);
+      }
+    });
 
-        </div>
-      </div>
-    `;
-    list.appendChild(card);
-  });
+    if (renderErrors.length) {
+      const warn = document.createElement('div');
+      warn.style.cssText = 'background:#fff3cd;border:1px solid #e0b44c;color:#6b4e00;padding:10px 12px;border-radius:8px;margin-bottom:10px;font-size:.9rem';
+      warn.innerHTML = '⚠️ Alguns alunos não puderam ser renderizados: ' + renderErrors.join(', ');
+      container.appendChild(warn);
+    }
 
-  container.appendChild(list);
-  // Update punição badges
-  turma.alunos.forEach(a => { if(typeof updatePunBadge === "function") updatePunBadge(turma.id, a.id); });
+    if (!list.children.length) {
+      container.innerHTML = `<div class="empty-state"><div class="icon">⚠️</div><p>Erro ao renderizar esta turma</p></div>`;
+      return;
+    }
 
-
+    container.appendChild(list);
+    (turma.alunos || []).forEach(a => { if(typeof updatePunBadge === "function") updatePunBadge(turma.id, a.id); });
+  } catch (err) {
+    console.error('Erro geral ao renderizar turma', err);
+    const container = document.getElementById('alunosContainer');
+    if (container) {
+      container.innerHTML = `<div class="empty-state"><div class="icon">⚠️</div><p>Erro ao renderizar esta turma</p><div style="margin-top:8px;font-size:.85rem;color:#666">Abra o console do navegador para ver o erro.</div></div>`;
+    }
+  }
 }
 
 // Attach event delegation ONCE to main content (permanent element)
@@ -1975,7 +2013,6 @@ window.renderAlunoList = function renderAlunoList() {
 function renderSelect(turmaId, alunoId, field, label) {
   const data = getData(turmaId, alunoId);
   const val = (data.avaliacao && data.avaliacao[field]) ? data.avaliacao[field] : 'nao_atribuido';
-  console.log('renderSelect', field, '=', val, 'from', JSON.stringify(data.avaliacao));
   return `
     <div class="avaliacao-item">
       <label>${label}</label>
