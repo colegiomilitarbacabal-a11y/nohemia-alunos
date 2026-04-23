@@ -1034,7 +1034,7 @@ body {
       const val = snap.val();
       for (const k in val) {
         const foto = window.alunoData[k] ? window.alunoData[k].foto : null;
-        window.alunoData[k] = val[k];
+        window.alunoData[k] = normalizeAlunoData(val[k]);
         if (foto) window.alunoData[k].foto = foto;
       }
       alunoData = window.alunoData;
@@ -1702,10 +1702,25 @@ function getDefaultData() {
   };
 }
 
+function normalizeAlunoData(raw = {}) {
+  const base = getDefaultData();
+  return {
+    faltas: (raw.faltas && typeof raw.faltas === 'object') ? raw.faltas : {},
+    avaliacao: { ...base.avaliacao, ...((raw.avaliacao && typeof raw.avaliacao === 'object') ? raw.avaliacao : {}) },
+    responsavel: { ...base.responsavel, ...((raw.responsavel && typeof raw.responsavel === 'object') ? raw.responsavel : {}) },
+    foto: raw.foto ?? null,
+    obs: typeof raw.obs === 'string' ? raw.obs : ''
+  };
+}
+
 function getData(turmaId, alunoId) {
   const k = getKey(turmaId, alunoId);
   // Always use window.alunoData as source of truth
-  if (!window.alunoData[k]) window.alunoData[k] = getDefaultData();
+  if (!window.alunoData[k]) {
+    window.alunoData[k] = getDefaultData();
+  } else {
+    window.alunoData[k] = normalizeAlunoData(window.alunoData[k]);
+  }
   alunoData = window.alunoData;
   return window.alunoData[k];
 }
