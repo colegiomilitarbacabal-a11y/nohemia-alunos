@@ -2463,18 +2463,22 @@ window.renderAlunoList = renderAlunoList;
 </script>
 
 <script>
-if ('serviceWorker' in navigator && location.protocol === 'https:') {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js')
-      .then(reg => {
-        console.log('SW registrado:', reg.scope);
-        // Force update
-        reg.update();
-      })
-      .catch(err => console.log('SW erro:', err));
-    // Unregister old SW and reload if needed
-    navigator.serviceWorker.ready.then(reg => {
-      reg.update();
+// ===== LIMPAR CACHE E SERVICE WORKER =====
+if ('serviceWorker' in navigator) {
+  // Desregistrar TODOS os service workers
+  navigator.serviceWorker.getRegistrations().then(regs => {
+    regs.forEach(reg => {
+      reg.unregister();
+      console.log('SW desregistrado:', reg.scope);
+    });
+  });
+}
+// Limpar TODOS os caches do browser
+if ('caches' in window) {
+  caches.keys().then(names => {
+    names.forEach(name => {
+      caches.delete(name);
+      console.log('Cache deletado:', name);
     });
   });
 }
