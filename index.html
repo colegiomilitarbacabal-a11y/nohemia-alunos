@@ -1169,25 +1169,22 @@ body {
       <p>Selecione uma turma</p>
     </div>
   </div>
-</div>
 </main>
 
-
-
-<!-- ===== MODAL CALENDÁRIO ===== -->
-<div id="calOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:800;align-items:flex-start;justify-content:center;padding-top:60px;">
-  <div style="background:#fff;border-radius:14px;padding:18px 16px 20px;max-width:340px;width:94%;box-shadow:0 8px 32px rgba(0,0,0,0.3);">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-      <span id="calAlunoNome" style="font-family:Oswald,sans-serif;font-size:0.95rem;color:#2d3a1e;font-weight:700;letter-spacing:0.5px;flex:1;margin-right:8px;"></span>
-      <button onclick="fecharCal()" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:#999;padding:2px 6px;border-radius:4px;">✕</button>
+<!-- ===== MODAL CALENDÁRIO DE FALTAS ===== -->
+<div id="calOverlay" onclick="if(event.target===this)fecharCal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:900;align-items:flex-start;justify-content:center;padding-top:50px;">
+  <div style="background:#f5f0e8;border-radius:16px;padding:18px 16px 22px;max-width:340px;width:95%;box-shadow:0 10px 40px rgba(0,0,0,0.35);max-height:85vh;overflow-y:auto;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <span id="calAlunoNome" style="font-family:Oswald,sans-serif;font-size:1rem;color:#2d3a1e;font-weight:700;letter-spacing:0.5px;"></span>
+      <button onclick="fecharCal()" style="background:rgba(0,0,0,0.1);border:none;border-radius:50%;width:30px;height:30px;font-size:1.1rem;cursor:pointer;color:#555;display:flex;align-items:center;justify-content:center;">✕</button>
     </div>
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-      <button onclick="calNavMes(-1)" style="background:var(--olive2);color:var(--gold2);border:none;border-radius:6px;padding:7px 16px;font-size:1rem;cursor:pointer;font-family:Oswald,sans-serif;">◀</button>
-      <span id="calMonthLabel" style="font-family:Oswald,sans-serif;font-size:0.9rem;color:#2d3a1e;font-weight:600;letter-spacing:0.5px;"></span>
-      <button onclick="calNavMes(+1)" style="background:var(--olive2);color:var(--gold2);border:none;border-radius:6px;padding:7px 16px;font-size:1rem;cursor:pointer;font-family:Oswald,sans-serif;">▶</button>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px;">
+      <button onclick="calNavMes(-1)" style="background:#2d3a1e;color:#e8c96a;border:none;border-radius:8px;padding:8px 18px;font-size:1rem;cursor:pointer;font-family:Oswald,sans-serif;font-weight:700;">◀</button>
+      <span id="calMonthLabel" style="font-family:Oswald,sans-serif;font-size:0.9rem;color:#2d3a1e;font-weight:700;letter-spacing:0.5px;text-align:center;flex:1;"></span>
+      <button onclick="calNavMes(+1)" style="background:#2d3a1e;color:#e8c96a;border:none;border-radius:8px;padding:8px 18px;font-size:1rem;cursor:pointer;font-family:Oswald,sans-serif;font-weight:700;">▶</button>
     </div>
-    <div class="cal-grid" id="calGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:10px;"></div>
-    <div class="cal-footer" style="text-align:center;font-size:0.75rem;color:#aaa;padding-top:4px;">Toque no dia para marcar/desmarcar falta</div>
+    <div id="calGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:12px;"></div>
+    <div class="cal-footer" style="text-align:center;font-size:0.75rem;color:#999;border-top:1px solid #ddd;padding-top:8px;">Toque no dia para marcar/desmarcar falta</div>
   </div>
 </div>
 
@@ -1733,8 +1730,8 @@ function getWorkdays(year, month) {
 function getFaltaCount(turmaId, alunoId, year, month) {
   const data = getData(turmaId, alunoId);
   if (!data || !data.faltas) return 0;
-  const _mStr = (month < 10 ? '0' : '') + month;
-  return Object.keys(data.faltas).filter(k => k.startsWith(year+'-'+_mStr+'-')).length;
+  const _mStr=(month<10?'0':'')+month;
+  return Object.keys(data.faltas).filter(k=>k.startsWith(year+'-'+_mStr+'-')).length;
 }
 
 // ==================== UI HELPERS ====================
@@ -1929,7 +1926,7 @@ window.renderAlunoList = function renderAlunoList() {
             <!-- Faltas registradas como tags -->
             <div class="faltas-tags" id="faltas-tags-${turma.id}-${aluno.id}">
               ${(function() {
-                const _mKey = (month < 10 ? '0' : '') + month;
+                const _mKey=(month<10?'0':'')+month;
                 const keys = Object.keys(data.faltas || {}).filter(k => k.startsWith(year+'-'+_mKey+'-')).sort((a,b) => parseInt(a.split('-')[2]) - parseInt(b.split('-')[2]));
                 if (keys.length === 0) return '<span class="faltas-empty">Nenhuma falta registrada</span>';
                 return keys.map(k => {
@@ -2200,7 +2197,7 @@ function abrirCal(btn) {
   _calYear = 2026;
   document.getElementById('calAlunoNome').textContent = btn.dataset.nome || 'Registrar Falta';
   renderCal();
-  const _calOv = document.getElementById('calOverlay'); if(_calOv) _calOv.style.display = 'flex';
+  const _ov=document.getElementById('calOverlay');if(_ov)_ov.style.display='flex';
 }
 
 function abrirCalDireto(tid, aid, nome) {
@@ -2210,11 +2207,11 @@ function abrirCalDireto(tid, aid, nome) {
   _calYear = 2026;
   document.getElementById('calAlunoNome').textContent = nome || 'Registrar Falta';
   renderCal();
-  const _calOv = document.getElementById('calOverlay'); if(_calOv) _calOv.style.display = 'flex';
+  const _ov=document.getElementById('calOverlay');if(_ov)_ov.style.display='flex';
 }
 
 function fecharCal() {
-  const _calOv2 = document.getElementById('calOverlay'); if(_calOv2) _calOv2.style.display = 'none';
+  const _ov2=document.getElementById('calOverlay');if(_ov2)_ov2.style.display='none';
   // Refresh card
   if (_calTurmaId && _calAlunoId) {
     updateAlunoHeader(_calTurmaId, _calAlunoId);
@@ -2330,7 +2327,7 @@ function refreshFaltasDias(turmaId, alunoId) {
   // Update dias list
   const diasEl = document.getElementById('faltas-dias-' + turmaId + '-' + alunoId);
   if (diasEl) {
-    const _mStr2 = (month < 10 ? '0' : '') + month;
+    const _mStr2=(month<10?'0':'')+month;
     const dias = Object.keys(data.faltas).filter(k => k.startsWith(year + '-' + _mStr2 + '-')).sort((a,b) => {
       return parseInt(a.split('-')[2]) - parseInt(b.split('-')[2]);
     });
