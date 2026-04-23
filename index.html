@@ -1034,7 +1034,11 @@ body {
       const val = snap.val();
       for (const k in val) {
         const foto = window.alunoData[k] ? window.alunoData[k].foto : null;
-        window.alunoData[k] = val[k];
+        const def = { faltas:{}, avaliacao:{ disciplina:'nao_atribuido', ordemUnida:'nao_atribuido', apresentacao:'nao_atribuido', habilFisica:'nao_atribuido', habilPortugues:'nao_atribuido', habilMatematica:'nao_atribuido', familiar:'receptivo' }, responsavel:{nome:'',telefone:''}, obs:'' };
+        window.alunoData[k] = Object.assign({}, def, val[k]);
+        window.alunoData[k].avaliacao = Object.assign({}, def.avaliacao, val[k].avaliacao || {});
+        window.alunoData[k].responsavel = Object.assign({}, def.responsavel, val[k].responsavel || {});
+        window.alunoData[k].faltas = val[k].faltas || {};
         if (foto) window.alunoData[k].foto = foto;
       }
       alunoData = window.alunoData;
@@ -1652,6 +1656,7 @@ function showToast() {
 
 // ==================== NIVEL DE COR ====================
 function calcNivel(avaliacao) {
+  if (!avaliacao) return 'neutro';
   const campos = ['disciplina','ordemUnida','apresentacao','habilFisica','habilPortugues','habilMatematica'];
   // nao_atribuido = not counted
   const atribuidos = campos.filter(c => avaliacao[c] && avaliacao[c] !== 'nao_atribuido');
@@ -1704,6 +1709,12 @@ function getData(turmaId, alunoId) {
   const k = getKey(turmaId, alunoId);
   // Always use window.alunoData as source of truth
   if (!window.alunoData[k]) window.alunoData[k] = getDefaultData();
+  const _d = window.alunoData[k];
+  const _def = getDefaultData();
+  if (!_d.avaliacao) _d.avaliacao = _def.avaliacao;
+  if (!_d.responsavel) _d.responsavel = _def.responsavel;
+  if (!_d.faltas) _d.faltas = {};
+  if (_d.obs === undefined) _d.obs = '';
   alunoData = window.alunoData;
   return window.alunoData[k];
 }
